@@ -76,7 +76,8 @@ We used [Kalibr](https://github.com/ethz-asl/kalibr) to calibrate the stereo cam
 
 - **`kalibr_imucam_chain.yaml`** — for each camera (cam0 = left, cam1 = right):
   - `intrinsics`, `distortion_coeffs` — standard lens calibration (focal length, distortion).
-  - **`T_cam_imu`** — the 4x4 transform from camera frame to IMU frame. **This is the value that caused our big bug (Section 5).** It has to correctly express that the camera's optical frame (Z pointing forward, X right, Y down) and the IMU's body frame (X forward, Y left, Z up) are rotated 90° relative to each other. Get this wrong and the estimator confuses "flying forward" with "flying up/down."
+  - **`T_cam_imu`** — the 4x4 transform from camera frame to IMU frame. **This is the value that caused our big bug (Section 5)** — twice: once by being wrong, and once by being "fixed" in the wrong direction. It expresses the rotation between the camera's optical frame and **whichever IMU OpenVINS is actually fed**. The pipeline feeds the Gemini 335L's *built-in* IMU (`/camera/gyro_accel/sample`), which is near-aligned with the IR optical frame by construction — so `T_cam_imu` here should be a **near-identity** rotation (see OpenVINS's stock `orbbec_335l_stereo_ir` config). A large rotation is only correct if you calibrate against a *separate* IMU mounted at some angle (e.g. the Pixhawk's `/mavros/imu/data`). Get this wrong and the estimator confuses "flying forward" with "flying up/down."
+  - **Do not trust `~/ros2_ws/kalibr_imu-camchain-imucam.yaml`** — that Kalibr run used the color camera (640x480, fx~543, `/camera/image_raw`) and the Pixhawk IMU, neither of which the pipeline uses. The repo's `kalibr_imucam_chain.yaml` currently borrows the stock IR rotation + intrinsics; a real Kalibr pass on the IR-stereo + Orbbec-built-in-IMU rig is still owed.
 
 - **`kalibr_imu_chain.yaml`** — IMU intrinsics: accelerometer/gyro noise density, random walk (used by the estimator's noise model), and `T_i_b` (IMU-to-body transform, currently identity — i.e. we're assuming the IMU is physically mounted aligned with the drone body frame). The `Tw`, `Ta`, `Tg`, `R_IMUtoGYRO`, `R_IMUtoACC` matrices are IMU axis-misalignment/scale corrections from Kalibr's IMU calibration — currently all identity/zero, meaning **no IMU intrinsic misalignment calibration has been applied yet**, only the nominal Kalibr defaults. This is a candidate area to revisit if drift shows up again after the camera-IMU fix.
 
@@ -89,47 +90,107 @@ We used [Kalibr](https://github.com/ethz-asl/kalibr) to calibrate the stereo cam
 ### Symptom
 The first real flight test (~90 seconds, ~150m flight path) produced a trajectory estimate that drifted **~107 meters from where it should have ended up — 72% of the total path length.** Altitude alone swung from +4m to -76m over the course of the flight. This wasn't a sudden glitch; it built up steadily over the whole flight.
 
-### Root cause
-`T_cam_imu` in `kalibr_imucam_chain.yaml` was effectively an **identity rotation** — i.e., it told the estimator "the camera and the IMU point the same direction." They don't: the camera's optical frame has Z pointing forward, while the IMU's body frame has X pointing forward. With the wrong transform, when the drone flew forward, the estimator's math interpreted that motion as happening along the wrong axis — effectively reading "forward motion" as "vertical motion," which is exactly the altitude-swing symptom we saw.
+### Root cause — corrected 2026-09-06 (the story has two layers)
 
-### The fix
-A corrected rotation matrix was written into `T_cam_imu` for both cam0 and cam1 (see `config/kalibr_imucam_chain.yaml` — it's the version currently in the repo). Concretely, instead of an identity matrix, it maps camera axes onto IMU axes correctly, e.g. for cam0:
+**Layer 1 (what we thought):** `T_cam_imu` was an identity rotation and the
+72 % flight needed a 90-degree correction. A hand-built 90-degree matrix was
+written in as the fix (in the repo `78409db` .. `4559cb2^`):
 ```yaml
-T_cam_imu:
-  - [0.0, -1.0,  0.0,  0.004181723256594681]
-  - [0.0,  0.0, -1.0, -0.0015170671986489532]
-  - [1.0,  0.0,  0.0, -0.005156202885411419]
-  - [0.0,  0.0,  0.0,  1.0]
+cam0.T_cam_imu:
+  - [0.0, -1.0,  0.0, ...]
+  - [0.0,  0.0, -1.0, ...]
+  - [1.0,  0.0,  0.0, ...]
 ```
 
+**Layer 2 (what replay diagnosis found):** that 90-degree matrix is *wrong*
+for this pipeline and is the reason every subsequent Orbbec test drifted
+20–50 %. OpenVINS is fed the Gemini 335L's **built-in IMU**
+(`/camera/gyro_accel/sample`), which is physically near-aligned with the IR
+optical frame — OpenVINS's stock `orbbec_335l_stereo_ir` config ships a
+**near-identity** `T_cam_imu` for exactly this sensor. Feeding it a
+90-degree rotation makes the filter interpret forward motion as vertical,
+i.e. it re-creates the altitude-swing symptom. This is motion-independent:
+even a tripod-static bag drifts with the bad matrix.
+
+The original 90-degree value was derived from a Kalibr run
+(`~/ros2_ws/kalibr_imu-camchain-imucam.yaml`) against the **color camera**
+and the **Pixhawk IMU** (`/mavros/imu/data`) — a different camera and a
+different IMU. A ~90-degree rotation is reasonable *there*; it does not
+transfer to the IR + Orbbec-IMU pipeline.
+
+### The fix (commit `4559cb2`, branch `drift-test-harness`)
+Both cam0/cam1 `T_cam_imu` rotation blocks reverted to the near-identity
+values from stock `orbbec_335l_stereo_ir` (translations, intrinsics,
+`rostopic`, `timeshift_cam_imu` unchanged), e.g. cam0:
+```yaml
+T_cam_imu:
+  - [ 0.99991, -0.00795, -0.01080,  0.004181723256594681]
+  - [ 0.00793,  0.99997, -0.00142, -0.0015170671986489532]
+  - [ 0.01081,  0.00133,  0.99994, -0.005156202885411419]
+  - [ 0.0,      0.0,      0.0,       1.0]
+```
+
+### Evidence
+Replaying the same `stage1_axes` bag through OpenVINS (drift from
+`/ov_msckf/poseimu`):
+
+| `T_cam_imu` rotation | drift | endpoint / path |
+|---|---|---|
+| hand-built 90 deg (old) | **43.7 %** | 4.2 m / 9.6 m |
+| stock near-identity (new) | **1.15 %** | 0.10 m / 9.1 m |
+
+EuRoC `V1_01_easy` on the same OpenVINS build + replay harness: 1.4 %.
+So OpenVINS and the tooling are sound; the calibration was the fault.
+
 ### Current validation status — read this carefully
-The fix is **applied and looks empirically correct from bench testing**, but is **not yet formally validated with real flight data**, and the project's own `docs/KNOWN_ISSUES.md` deliberately says so. Two reasons:
-
-1. The original 72%-drift flight bag only recorded OpenVINS's *output* topics (`/odomimu`, `/poseimu`, `/pathimu`), not the raw camera/IMU input. That means we **cannot reprocess the original bad flight** with the fix to directly prove the improvement on that exact flight — we can only test fresh.
-2. All post-fix testing done so far (see numbers below) was **hand-carried motion on a laptop**, not an actual UAV flight, and it still only recorded `/ov_msckf/poseimu` rather than raw sensor topics.
-
-So: strong evidence the fix works, but not yet the kind of proof the project standard requires. Don't mark this "resolved" in any doc without a real dynamic/flight test that also records raw topics.
+The new value is **replay-validated on `stage1_axes`**, not flight-validated.
+Do not mark this "resolved" until:
+1. A real dynamic/flight test through `docs/TEST_PLAN.md` Stages 1–3, with
+   `scripts/record_bag.sh` capturing **raw** topics (so it can be reprocessed).
+2. A proper Kalibr calibration of the actual IR-stereo + Orbbec-built-in-IMU
+   rig replaces the current stock-borrowed values.
+3. The camera mounting orientation is checked against a photo of the real rig.
 
 ---
 
 ## 6. What's confirmed working (with numbers)
 
-These are real results from `~/calib_recordings/compute_drift.py`, run against post-fix bag recordings of `/ov_msckf/poseimu`:
+**Replay-validated (2026-09-06), on this Jetson with the `4559cb2`
+near-identity `T_cam_imu`:**
 
-| Test | Duration | Path length | Endpoint drift | Drift as % of path |
+| Test | Source | Drift (`/ov_msckf/poseimu`) |
+|---|---|---|
+| `stage1_axes` (gentle 100 s handheld) | bag replay | **1.15 %** (0.10 m / 9.1 m) |
+| EuRoC `V1_01_easy` (reference dataset) | bag replay | 1.4 % (sanity: build + harness OK) |
+| same `stage1_axes` with the *old* 90-deg matrix | bag replay | 43.7 % — the bug |
+
+**Historical bench numbers — treat as suspect.** These were run with
+`~/calib_recordings/compute_drift.py` against hand-carried laptop bags and
+were the basis for believing the 90-degree fix worked:
+
+| Test | Duration | Path | Endpoint drift | % of path |
 |---|---|---|---|---|
-| `stereo_static_drift_test` (camera stationary) | 102.9s | ~0m | 0.013 cm | n/a (sanity check) |
-| `openvins_laptop_final_test` (hand-carried motion) | 89.8s | 9.90 m | 12.92 cm | **1.31%** |
-| `openvins_laptop_final_test2` (hand-carried motion) | 152.9s | 28.69 m | 34.56 cm | **1.21%** |
+| `stereo_static_drift_test` (stationary) | 102.9 s | ~0 m | 0.013 cm | n/a |
+| `openvins_laptop_final_test` (hand-carried) | 89.8 s | 9.90 m | 12.92 cm | 1.31 % |
+| `openvins_laptop_final_test2` (hand-carried) | 152.9 s | 28.69 m | 34.56 cm | 1.21 % |
 
-Compare that to the pre-fix flight's **72%** drift — this is the evidence the axis-mismatch fix is doing its job. The stationary test also confirms the estimator doesn't drift meaningfully when nothing is moving, which rules out a bias/noise problem in the estimator's rest state.
+They almost certainly used the **Pixhawk IMU** (for which the 90-degree
+matrix is reasonable), not the Orbbec built-in IMU the pipeline runs. They
+do not validate the current pipeline. If those bags recorded raw topics,
+re-run them through the fixed config to confirm.
 
 **Working / validated pieces of the pipeline:**
 - Stereo camera + IMU driver bring-up (Orbbec Gemini 335L via `orbbec_camera`).
-- Stereo intrinsic + camera-IMU extrinsic calibration via Kalibr (see calibration report in `calib_recordings/` before trusting a new calibration — check reprojection error).
-- OpenVINS running stereo-inertial MSCKF against the corrected extrinsics, producing low-drift pose estimates in bench conditions.
-- `compute_drift.py` as an analysis tool — it correctly parses `/ov_msckf/poseimu` from a bag, computes endpoint drift, path length, drift %, and max excursion.
+- OpenVINS build (`v2.7-20-g6948812`) — proven correct on EuRoC (1.4 %) and on
+  `stage1_axes` once the calibration was fixed.
+- The bag-replay diagnostic harness on this Jetson (see `KNOWN_ISSUES.md` #4
+  for the infra bugs it had to fix first).
+- `compute_drift.py` / `flight_analysis.py --odom-topic /ov_msckf/poseimu` as
+  analysis tools.
 - Jetson clock-lock procedure prevents frame-drop/jitter issues.
+
+**Not yet validated:** any camera-IMU extrinsic calibration for the *actual*
+IR + Orbbec-IMU rig (the current one is stock-borrowed); any flight.
 
 ---
 
@@ -137,7 +198,25 @@ Compare that to the pre-fix flight's **72%** drift — this is the evidence the 
 
 This is the honest gap list. Don't assume any of these are done just because related pieces work.
 
-1. **No real dynamic/flight validation yet.** Everything good above was bench-tested by hand-carrying the camera. The actual goal right now is a **real dynamic test** (ideally an actual flight, or at minimum realistic dynamic motion) that also **records raw topics** (`/camera/left_ir/image_raw`, `/camera/right_ir/image_raw`, `/camera/gyro_accel/sample`), not just the estimator's output — so that if something looks wrong, we can actually debug it by reprocessing, instead of getting stuck the way we did with the original 72%-drift flight.
+1. **No real dynamic/flight validation yet.** The good result above (1.15 % on
+   `stage1_axes`) is a **bag replay**, not a UAV flight. The actual goal is a
+   **real dynamic test** (a flight, or at minimum realistic dynamic motion)
+   that also **records raw topics** (`/camera/left_ir/image_raw`,
+   `/camera/right_ir/image_raw`, `/camera/gyro_accel/sample`), not just the
+   estimator's output — so a bad result can be debugged by reprocessing.
+
+1b. **A proper Kalibr calibration is still owed.** `config/kalibr_imucam_chain.yaml`
+   currently borrows the `T_cam_imu` rotation and IR intrinsics from OpenVINS's
+   stock `orbbec_335l_stereo_ir` config (that's what commit `4559cb2` does). It
+   works (~1 %), but it is not a calibration of *this* unit. Record a fresh
+   Kalibr set — IR stereo + the Orbbec **built-in** IMU (`/camera/gyro_accel/sample`),
+   not the Pixhawk — and check reprojection error before trusting it.
+
+1c. **OpenVINS shutdown crash is patched locally, not upstream.** `ov_msckf`
+   on this Jetson carries a local patch (`open_vins` branch `jetson-local-patches`,
+   commit `da5e46a`) so `run_subscribe_msckf` exits cleanly instead of
+   `SIGABRT`-ing on every SIGINT. A `colcon build` from a clean `open_vins`
+   checkout loses it — see `KNOWN_ISSUES.md` #5.
 
 2. ~~`vps_bridge_node` isn't wired to OpenVINS.~~ **Done.** It now subscribes to both `/ov_msckf/poseimu` (OpenVINS) and `/visual_slam/tracking/odometry` (cuVSLAM), forwarding whichever is active to `/mavros/vision_pose/pose`. It also now sanity-checks every pose before forwarding it (rejects implausible instantaneous velocity or a covariance spike, tracked separately per source) — this directly addresses the cuVSLAM tracking-spike risk in #4 below, since a spike now gets dropped instead of reaching the flight controller. Verified against a replayed real bag (clean data passes through untouched) and a synthetic ~495 m/s injected jump (correctly rejected, never reached the output topic). **This code lives in `~/ros2_ws/src/vps_bridge`, which is not yet under git — it needs to be added to this repo (or its own repo) before it counts as "in" the project for real.**
 
@@ -145,7 +224,7 @@ This is the honest gap list. Don't assume any of these are done just because rel
 
 4. **cuVSLAM has an unresolved tracking-spike issue.** During fast/jerky motion, cuVSLAM occasionally produces a single-frame catastrophic pose jump, and its `vo_state`/tracking-status flag does *not* reliably flag it. No mitigation is implemented yet — the plan on file is a downstream sanity check on instantaneous velocity/covariance before trusting a pose update. Don't treat cuVSLAM as flight-ready until this is addressed, if it's the path we go down instead of/alongside OpenVINS.
 
-5. **IMU intrinsic calibration (`kalibr_imu_chain.yaml`) is still at defaults** — `Tw`, `Ta`, `Tg`, `R_IMUtoGYRO`, `R_IMUtoACC` are identity/zero, meaning no IMU axis-misalignment/scale correction from Kalibr has actually been applied. Worth a second calibration pass if drift reappears after the camera-IMU fix is validated, so we don't confuse a second bug with the first.
+5. **IMU intrinsic calibration (`kalibr_imu_chain.yaml`) is still at defaults** — `Tw`, `Ta`, `Tg`, `R_IMUtoGYRO`, `R_IMUtoACC` are identity/zero, meaning no IMU axis-misalignment/scale correction from Kalibr has actually been applied. Fold this into the fresh calibration pass in item 1b — and note `rostopic` there must be `/camera/gyro_accel/sample` (the Orbbec built-in IMU), matching what OpenVINS is fed.
 
 6. **Jetson clock resets to epoch (1970) on boot without NTP**, producing bag folders with bogus timestamps like `flight_19700101_*`. Install/enable `chrony` on the Jetson if this hasn't been done, especially before any test whose timestamps matter for analysis.
 
@@ -184,5 +263,6 @@ ros2 launch vps_uav_benchmarking cuvslam_gemini335l.launch.py
 1. ~~Wire OpenVINS's `/ov_msckf/poseimu` into `vps_bridge_node`.~~ **Done.** It now subscribes to both `/ov_msckf/poseimu` (OpenVINS) and `/visual_slam/tracking/odometry` (cuVSLAM), and both are sanity-checked (implausible velocity / covariance spike) before being forwarded to `/mavros/vision_pose/pose` — see `~/ros2_ws/src/vps_bridge`. This package is not yet in this git repo; it will be added separately.
 2. ~~Port `compute_drift.py` into the repo.~~ **Done** — see `scripts/compute_drift.py`.
 3. Set up a test that records **raw topics**, not just estimator output, so results are debuggable and reprocessable.
-4. Run a real dynamic/flight test with raw topics recorded, then re-run `compute_drift.py` against it. Only then update `docs/KNOWN_ISSUES.md` to mark the axis-mismatch fix as validated.
-5. Revisit IMU intrinsic calibration if drift shows up again after that test.
+4. ~~Establish which `T_cam_imu` is correct.~~ **Done (2026-09-06)** — near-identity, for the Orbbec built-in IMU; commit `4559cb2`. `stage1_axes` replay drift 43.7 % -> 1.15 %. See `KNOWN_ISSUES.md` #2.
+5. Record a fresh Kalibr calibration of the real IR-stereo + Orbbec-built-in-IMU rig (camera-IMU extrinsics **and** IMU intrinsics) to replace the stock-borrowed values.
+6. Run a real dynamic/flight test with raw topics recorded, then re-run `compute_drift.py` against it. Only then update `docs/KNOWN_ISSUES.md` #2 to mark the axis fix flight-validated.
