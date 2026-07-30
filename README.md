@@ -10,7 +10,7 @@ Lock Jetson clocks before flight to prevent IMU timing errors:
 ## Installation
 Clone into your ROS 2 workspace:
 `cd ~/ros2_ws/src`
-`git clone https://github.com/YourUsername/vps_uav_benchmarking.git`
+`git clone https://github.com/uvatsbe23-a11y/vps_uav_benchmarking.git`
 `cd ~/ros2_ws && colcon build --symlink-install`
 
 ## Post-Flight Diagnostics
