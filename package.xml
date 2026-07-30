@@ -10,8 +10,11 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rosbag2_py</exec_depend>
   <exec_depend>orbbec_camera</exec_depend>
   <exec_depend>ov_msckf</exec_depend>
+  <exec_depend>isaac_ros_visual_slam</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
