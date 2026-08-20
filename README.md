@@ -32,6 +32,4 @@ Clone into your ROS 2 workspace:
 * **Flight Analyzer:** `python3 scripts/flight_analysis.py /path/to/flight_bag`
 * **Report Generation:** `python3 scripts/generate_briefing_graphs.py`
 
-## License & Access
-**Proprietary and Confidential.** 
-This repository is restricted for internal team use only. Unauthorized distribution is prohibited.
+
