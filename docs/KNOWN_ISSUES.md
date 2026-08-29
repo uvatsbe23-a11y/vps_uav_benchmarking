@@ -21,6 +21,10 @@ flag it. Mitigation planned: downstream velocity/covariance sanity-check.
   topics, not raw sensor input, so it cannot be reprocessed to confirm
   the fix. A new validation test (raw topics recorded) is required
   before treating this as resolved.
+* **Validation procedure:** see `docs/TEST_PLAN.md` (Stage 1 is the direct
+  axis check; Stage 2/3 measure closed-loop drift). All bags are recorded
+  via `scripts/record_bag.sh`, which captures raw IR + camera_info + IMU
+  so they can be replayed through OpenVINS.
 
 ## 3. Hardware Clock Drift
 

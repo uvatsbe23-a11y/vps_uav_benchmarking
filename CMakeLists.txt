@@ -14,6 +14,10 @@ install(DIRECTORY config docs
 
 install(PROGRAMS
   scripts/compute_drift.py
+  scripts/flight_analysis.py
+  scripts/generate_briefing_graphs.py
+  scripts/check_setup.sh
+  scripts/record_bag.sh
   DESTINATION lib/vps_uav_benchmarking
 )
 
