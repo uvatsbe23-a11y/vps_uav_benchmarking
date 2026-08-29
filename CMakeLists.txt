@@ -12,8 +12,8 @@ install(DIRECTORY config docs
   DESTINATION share/vps_uav_benchmarking
 )
 
-install(PROGRAMS 
-  scripts/flight_analysis.py
+install(PROGRAMS
+  scripts/compute_drift.py
   DESTINATION lib/vps_uav_benchmarking
 )
 

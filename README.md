@@ -29,7 +29,8 @@ Clone into your ROS 2 workspace:
 `cd ~/ros2_ws && colcon build --symlink-install`
 
 ## Post-Flight Diagnostics
-* **Flight Analyzer:** `python3 scripts/flight_analysis.py /path/to/flight_bag`
+* **Drift Analyzer:** `python3 scripts/compute_drift.py /path/to/flight_bag [edge_window_sec]`
+  Reads `/ov_msckf/poseimu` from a rosbag2 recording (mcap or sqlite3) and reports duration, path length, endpoint drift, drift as % of path, and max excursion from the start position. Pass `edge_window_sec` to average that many seconds at the start/end (useful for closed-loop motion tests that return to the start); omit it for static/point-to-point drift.
 * **Report Generation:** `python3 scripts/generate_briefing_graphs.py`
 
 
