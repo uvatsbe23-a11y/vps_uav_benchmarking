@@ -1,0 +1,19 @@
+
+Files:             bringup_test_0.db3
+Bag size:          3.5 GiB
+Storage id:        sqlite3
+Duration:          153.117981984s
+Start:             Jan  1 1970 06:47:01.545368384 (4621.545368384)
+End:               Jan  1 1970 06:49:34.663350368 (4774.663350368)
+Messages:          93894
+Topic information: Topic: /camera/gyro_accel/sample | Type: sensor_msgs/msg/Imu | Count: 75537 | Serialization Format: cdr
+                   Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 0 | Serialization Format: cdr
+                   Topic: /camera/left_ir/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 4589 | Serialization Format: cdr
+                   Topic: /camera/right_ir/camera_info | Type: sensor_msgs/msg/CameraInfo | Count: 4589 | Serialization Format: cdr
+                   Topic: /camera/left_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 4589 | Serialization Format: cdr
+                   Topic: /camera/right_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 4589 | Serialization Format: cdr
+                   Topic: /ov_msckf/pathimu | Type: nav_msgs/msg/Path | Count: 0 | Serialization Format: cdr
+                   Topic: /ov_msckf/poseimu | Type: geometry_msgs/msg/PoseWithCovarianceStamped | Count: 0 | Serialization Format: cdr
+                   Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                   Topic: /tf | Type: tf2_msgs/msg/TFMessage | Count: 0 | Serialization Format: cdr
+

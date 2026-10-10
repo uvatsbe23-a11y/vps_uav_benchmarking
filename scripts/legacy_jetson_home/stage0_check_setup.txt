@@ -1,0 +1,10 @@
+== topics present ==
+  [ OK ]  /camera/left_ir/image_raw
+  [ OK ]  /camera/right_ir/image_raw
+  [ OK ]  /camera/left_ir/camera_info
+  [ OK ]  /camera/gyro_accel/sample
+  [ OK ]  /ov_msckf/odomimu
+== stream rates ==
+  [ OK ]  left IR: 29.975 Hz (>= 15)
+  [ OK ]  right IR: 29.976 Hz (>= 15)
+  [ OK ]  IMU sync accel/gyro: 498.641 Hz (>= 300)
