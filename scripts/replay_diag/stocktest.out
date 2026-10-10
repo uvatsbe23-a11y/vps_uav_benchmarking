@@ -1,0 +1,72 @@
+=== kalibr_imucam rostopics ===
+  rostopic: /camera/left_ir/image_raw
+
+  rostopic: /camera/right_ir/image_raw
+
+=== kalibr_imu rostopic ===
+  rostopic: /camera/gyro_accel/sample
+
+=== stock cam0 T_cam_imu ===
+  T_cam_imu:
+    - [0.9999100869189833, -0.007949190156172086, -0.010799465428097897, 0.004181723256594681]
+    - [0.007934341377451823, 0.9999675184924203, -0.0014171051540402455, -0.0015170671986489532]
+    - [0.010810379483520491, 0.001331291092349203, 0.9999406799202891, -0.005156202885411419]
+    - [0.0, 0.0, 0.0, 1.0]
+
+########## STOCK orbbec_335l_stereo_ir  vs  stage1_axes_6sept ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784996729.891307464] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_6sept/stage1_axes_6sept_0.db3' for READ_ONLY.
+[INFO] [1784996729.891458856] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784996729.904569992] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784996729.904673960] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784996729.904712840] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784996729.904741768] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784996729.904767880] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784996729.905635464] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_6sept/stage1_axes_6sept_0.db3' for READ_ONLY.
+  init OK/FAIL : 1 / 0
+  ERRORs      : [run_subscribe_msckf-1] [ERROR] [1784996791.515824936] [ov_msckf.ov_msckf.rclcpp]: Error in destruction of rcl publisher handle: cannot publish data, at ./src/rmw_publish.cpp:62, at ./src/rcl/publisher.c:187
+[run_subscribe_msckf-1] [ERROR] [1784996791.515905160] [ov_msckf.ov_msckf.rclcpp]: Error in destruction of rcl publisher handle: cannot publish data, at ./src/rmw_publish.cpp:62, at ./src/rcl/publisher.c:187
+[run_subscribe_msckf-1] [ERROR] [1784996791.516134216] [ov_msckf.ov_msckf.rclcpp]: Error in destruction of rcl subscription handle: Failed to delete datareader, at ./src/subscription.cpp:52, at ./src/rcl/subscription.c:184
+  final intern: q_GtoI = -0.574,0.396,-0.377,0.609 | p_IinG = -0.963,0.827,0.938 | dist = 3.17 (meters)
+[INFO] [1784996796.333753000] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== stock_stage1_axes_6sept ===
+  samples from /ov_msckf/poseimu   : 768
+  duration                       : 25.6 s
+  first-pose offset from origin  : 0.067 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 3.26 m
+  endpoint error |end - start|    : 1.618 m
+      x / y / z                  : -1.029 / +0.834 / +0.930 m
+  max |z - z_start|              : 0.943 m   <-- Z-divergence watch
+  DRIFT                          : 49.67 %  of path length
+  ACCEPT
+
+########## STOCK orbbec_335l_stereo_ir  vs  stage1_axes ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784996814.404035144] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784996814.404186120] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784996814.417434568] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784996814.417550952] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784996814.417589544] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784996814.417618344] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784996814.417644168] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784996814.418536488] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784996943.882309800] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  init OK/FAIL : 1 / 0
+  ERRORs      : [run_subscribe_msckf-1] run_subscribe_msckf: pthread_mutex_lock.c:160: ___pthread_mutex_lock: Assertion `PTHREAD_MUTEX_TYPE (mutex) == PTHREAD_MUTEX_ERRORCHECK_NP' failed.
+[ERROR] [run_subscribe_msckf-1]: process has died [pid 1952858, exit code -6, cmd '/home/vajra/ros2_ws/install/ov_msckf/lib/ov_msckf/run_subscribe_msckf --ros-args -r __node:=ov_msckf -r __ns:=/ov_msckf --params-file /tmp/launch_params_o7sorpwk'].
+  final intern: q_GtoI = -0.552,0.467,-0.424,0.545 | p_IinG = -0.088,0.005,0.001 | dist = 7.60 (meters)
+[INFO] [1784996954.061876328] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== stock_stage1_axes ===
+  samples from /ov_msckf/poseimu   : 1244
+  duration                       : 41.6 s
+  first-pose offset from origin  : 0.002 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 7.63 m
+  endpoint error |end - start|    : 0.090 m
+      x / y / z                  : -0.090 / +0.006 / +0.003 m
+  max |z - z_start|              : 0.670 m   <-- Z-divergence watch
+  DRIFT                          : 1.18 %  of path length
+  ACCEPT
+
+STOCKTEST DONE

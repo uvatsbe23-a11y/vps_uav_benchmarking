@@ -1,0 +1,70 @@
+=== repo config in use (T_cam_imu cam0) ===
+cam0:
+  T_cam_imu:
+    - [0.9999100869189833, -0.007949190156172086, -0.010799465428097897, 0.004181723256594681]
+    - [0.007934341377451823, 0.9999675184924203, -0.0014171051540402455, -0.0015170671986489532]
+    - [0.010810379483520491, 0.001331291092349203, 0.9999406799202891, -0.005156202885411419]
+    - [0.0, 0.0, 0.0, 1.0]
+  cam_overlaps: [1]
+  camera_model: pinhole
+=== init_dyn_use / try_zupt / calib flags ===
+calib_cam_extrinsics: true      # let the filter refine T_cam_imu online (starts from the file value)
+calib_cam_intrinsics: true
+calib_cam_timeoffset: true      # refine timeshift_cam_imu online
+try_zupt: true
+init_dyn_use: false
+
+########## axes_repofix  (bag stage1_axes, repo default config) ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784997857.551772488] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784997857.551917128] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784997857.560973896] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784997857.561065064] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784997857.561102472] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784997857.561132488] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784997857.561155848] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784997857.561924360] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998007.041361928] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  init OK/FAIL : 1 / 0
+  crash?      : 1
+  final intern: q_GtoI = -0.557,0.462,-0.420,0.547 | p_IinG = -0.181,-0.092,-0.059 | dist = 8.36 (meters)
+[INFO] [1784998017.244168712] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== axes_repofix ===
+  samples from /ov_msckf/poseimu   : 1070
+  duration                       : 71.3 s
+  first-pose offset from origin  : 0.265 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.14 m
+  endpoint error |end - start|    : 0.105 m
+      x / y / z                  : +0.024 / +0.077 / -0.067 m
+  max |z - z_start|              : 0.627 m   <-- Z-divergence watch
+  DRIFT                          : 1.15 %  of path length
+  ACCEPT
+
+########## v6sept_repofix  (bag stage1_axes_v6sept, repo default config) ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784998035.322736008] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784998035.322866088] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784998035.331872552] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784998035.331961224] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784998035.331991080] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784998035.332015720] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784998035.332035560] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784998035.332791720] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL : 1 / 34
+  crash?      : 1
+  final intern: q_GtoI = -0.008,-0.022,-0.994,0.102 | p_IinG = 4.838,47.846,-5.736 | dist = 56.41 (meters)
+[INFO] [1784998126.201848712] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== v6sept_repofix ===
+  samples from /ov_msckf/poseimu   : 532
+  duration                       : 35.4 s
+  first-pose offset from origin  : 0.082 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 61.29 m
+  endpoint error |end - start|    : 48.362 m
+      x / y / z                  : +4.804 / +47.784 / -5.694 m
+  max |z - z_start|              : 5.694 m   <-- Z-divergence watch
+  DRIFT                          : 78.90 %  of path length
+  ACCEPT
+
+FINAL_STAGE1 DONE

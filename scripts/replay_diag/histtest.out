@@ -1,0 +1,92 @@
+
+############### none ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992664.106729512] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992664.106882440] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992664.119570440] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992664.119678024] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992664.119708328] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992664.119728616] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992664.119746728] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992664.120643976] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  hist method     : 
+  init OK / FAILED: 1 / 0
+  num_features0,1 : compute disp: 0,64 compute disp: 0,64 compute disp: 0,59 
+  UPDATE-MSCKF    : 0   UPDATE-SLAM: 0
+  ZUPT accepted   : 24
+  final internal  : q_GtoI = 0.021,-0.022,-0.662,0.749 | p_IinG = 4.008,2.802,13.488 | dist = 20.60 (meters)
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 16296 | Serialization Format: cdr
+[INFO] [1784992756.440856200] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== none ===
+  samples from /ov_msckf/odomimu   : 16296
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.319 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 30.69 m
+  endpoint error |end - start|    : 14.359 m
+      x / y / z                  : +4.018 / +3.126 / +13.426 m
+  max |z - z_start|              : 13.426 m   <-- Z-divergence watch
+  DRIFT                          : 46.79 %  of path length
+  ACCEPT
+
+############### clahe ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992778.123857192] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992778.124228840] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992778.145334024] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992778.145479464] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992778.145531656] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992778.145567720] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992778.145599624] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992778.147072360] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  hist method     : 
+  init OK / FAILED: 1 / 0
+  num_features0,1 : compute disp: 0,91 compute disp: 0,91 compute disp: 0,121 
+  UPDATE-MSCKF    : 0   UPDATE-SLAM: 0
+  ZUPT accepted   : 16
+  final internal  : q_GtoI = 0.456,-0.156,-0.720,0.499 | p_IinG = -16744.186,6768.047,-16161.903 | dist = 16903.96 (meters)
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 18410 | Serialization Format: cdr
+[INFO] [1784992870.444548008] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== clahe ===
+  samples from /ov_msckf/odomimu   : 18410
+  duration                       : 37.3 s
+  first-pose offset from origin  : 1.056 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 47484.19 m
+  endpoint error |end - start|    : 24357.616 m
+      x / y / z                  : -16828.145 / +6808.853 / -16240.275 m
+  max |z - z_start|              : 16240.275 m   <-- Z-divergence watch
+  DRIFT                          : 51.30 %  of path length
+  ACCEPT
+
+############### eqhist_dyn ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992892.142099592] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992892.142243656] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992892.151462824] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992892.151606344] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992892.151642504] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992892.151666056] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992892.151684936] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992892.152845128] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  hist method     : 
+  init OK / FAILED: 1 / 0
+  num_features0,1 : compute disp: 0,50 compute disp: 0,55 compute disp: 0,66 
+  UPDATE-MSCKF    : 0   UPDATE-SLAM: 0
+  ZUPT accepted   : 11
+  final internal  : q_GtoI = 0.024,-0.007,-0.606,0.795 | p_IinG = 60.773,-23.693,-12.527 | dist = 110.41 (meters)
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 16414 | Serialization Format: cdr
+[INFO] [1784992984.453639528] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== eqhist_dyn ===
+  samples from /ov_msckf/odomimu   : 16414
+  duration                       : 36.4 s
+  first-pose offset from origin  : 0.041 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 169.31 m
+  endpoint error |end - start|    : 66.707 m
+      x / y / z                  : +61.031 / -23.804 / -12.583 m
+  max |z - z_start|              : 12.583 m   <-- Z-divergence watch
+  DRIFT                          : 39.40 %  of path length
+  ACCEPT
+
+HISTTEST DONE

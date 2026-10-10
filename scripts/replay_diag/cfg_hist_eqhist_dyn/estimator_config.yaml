@@ -1,0 +1,118 @@
+%YAML:1.0
+# =============================================================================
+# OpenVINS estimator config - Jetson + Orbbec Gemini 335L (stereo IR + IMU)
+#
+# This is the top-level file OpenVINS loads. It pulls the camera and IMU
+# calibration from the two files next to it:
+#     relative_config_imu     -> kalibr_imu_chain.yaml
+#     relative_config_imucam  -> kalibr_imucam_chain.yaml   (holds the fixed T_cam_imu)
+#
+# Launch with:
+#     ros2 launch vps_uav_benchmarking openvins_gemini335l.launch.py
+# =============================================================================
+
+verbosity: "INFO"
+
+use_fej: true
+integration: "rk4"
+use_stereo: true
+max_cameras: 2
+
+calib_cam_extrinsics: true      # let the filter refine T_cam_imu online (starts from the file value)
+calib_cam_intrinsics: true
+calib_cam_timeoffset: true      # refine timeshift_cam_imu online
+calib_imu_intrinsics: false
+calib_imu_g_sensitivity: false
+
+max_clones: 11
+max_slam: 50
+max_slam_in_update: 25
+max_msckf_in_update: 40
+dt_slam_delay: 1
+
+gravity_mag: 9.81
+
+feat_rep_msckf: "GLOBAL_3D"
+feat_rep_slam: "ANCHORED_MSCKF_INVERSE_DEPTH"
+feat_rep_aruco: "ANCHORED_MSCKF_INVERSE_DEPTH"
+
+# ---- aruco tag tracking + feature mask: unused, but required keys in OpenVINS v2.7 ----
+use_aruco: false
+num_aruco: 1024
+downsize_aruco: true
+use_mask: false
+
+# ---- zero-velocity update: helps a lot for the static test and takeoff/landing ----
+try_zupt: true
+zupt_chi2_multipler: 0
+zupt_max_velocity: 0.1
+zupt_noise_multiplier: 10
+zupt_max_disparity: 0.5
+zupt_only_at_beginning: false
+
+# ---- initialization ----
+init_window_time: 2.0
+init_imu_thresh: 1.0            # accel jerk (m/s^2) needed to start; give it a small shake/figure-8
+init_max_disparity: 10.0
+init_max_features: 50
+init_dyn_use: true
+# dynamic initializer is off (init_dyn_use: false) but OpenVINS v2.7 still
+# parses these as required - values copied from the stock orbbec_335l_stereo_ir config
+init_dyn_mle_opt_calib: false
+init_dyn_mle_max_iter: 100
+init_dyn_mle_max_time: 0.5
+init_dyn_mle_max_threads: 6
+init_dyn_num_pose: 4
+init_dyn_min_deg: 2.0
+init_dyn_inflation_ori: 10
+init_dyn_inflation_vel: 100
+init_dyn_inflation_bg: 10
+init_dyn_inflation_ba: 100
+init_dyn_min_rec_cond: 1e-12
+init_dyn_bias_g: [ 0.0, 0.0, 0.0 ]
+init_dyn_bias_a: [ 0.0, 0.0, 0.0 ]
+
+# ---- state logging (written to the working directory OpenVINS is started from) ----
+record_timing_information: false
+record_timing_filepath: "/tmp/traj_timing.txt"   # required key even when the flag above is false
+save_total_state: true
+filepath_est: "state_estimate.txt"
+filepath_std: "state_deviation.txt"
+filepath_gt: "state_groundtruth.txt"
+
+# ---- feature tracker (KLT) ----
+use_klt: true
+num_pts: 200
+fast_threshold: 20
+grid_x: 5
+grid_y: 5
+min_px_dist: 10
+knn_ratio: 0.70
+track_frequency: 21.0
+downsample_cameras: false
+multi_threading: true
+num_opencv_threads: 4
+histogram_method: "HISTOGRAM"
+
+# ---- triangulation ----
+fi_triangulate_1d: false
+fi_refine_features: true
+fi_max_runs: 5
+fi_init_lamda: 1e-3
+fi_max_lamda: 1e10
+fi_min_dist: 0.10
+fi_max_dist: 60.0
+fi_max_baseline: 40.0
+fi_max_cond_number: 10000.0
+
+# ---- update noise (pixels) ----
+up_msckf_sigma_px: 1
+up_msckf_chi2_multipler: 1
+up_slam_sigma_px: 1
+up_slam_chi2_multipler: 1
+up_aruco_sigma_px: 1
+up_aruco_chi2_multipler: 1
+
+# ---- calibration files (same directory as this file) ----
+relative_config_imu: "kalibr_imu_chain.yaml"
+relative_config_imucam: "kalibr_imucam_chain.yaml"

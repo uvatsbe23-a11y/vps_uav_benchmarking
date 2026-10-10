@@ -1,0 +1,66 @@
+multi_threading_pubs line: multi_threading_pubs: false   # run image publishing inline; avoids a detached-thread
+
+########## axes  run 1/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784998313.396991912] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998313.397130376] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784998313.405936680] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784998313.406023112] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784998313.406056040] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784998313.406083240] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784998313.406109256] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784998313.406851048] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998462.891544808] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  exit/crash lines: [ERROR] [run_subscribe_msckf-1]: process has died [pid 1979263, exit code -6, cmd '/home/vajra/ros2_ws/install/ov_msckf/lib/ov_msckf/run_subscribe_msckf --ros-args -r __node:=ov_msckf -r __ns:=/ov_msckf --params-file /tmp/launch_params_h2uzr9h8'].
+  clean 'Done!' / shutdown: 1
+  init OK: 1
+[INFO] [1784998474.038689320] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== axes_1 ===
+  samples from /ov_msckf/poseimu   : 1070
+  duration                       : 71.3 s
+  first-pose offset from origin  : 0.265 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.14 m
+  endpoint error |end - start|    : 0.105 m
+      x / y / z                  : +0.024 / +0.077 / -0.067 m
+  max |z - z_start|              : 0.627 m   <-- Z-divergence watch
+  DRIFT                          : 1.15 %  of path length
+  ACCEPT
+
+########## axes  run 2/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784998492.734231016] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998492.734429576] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784998492.755839080] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784998492.755989320] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784998492.756046792] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784998492.756087176] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784998492.756121960] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784998492.757660424] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998641.541613416] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  exit/crash lines: [ERROR] [run_subscribe_msckf-1]: process has died [pid 1985911, exit code -6, cmd '/home/vajra/ros2_ws/install/ov_msckf/lib/ov_msckf/run_subscribe_msckf --ros-args -r __node:=ov_msckf -r __ns:=/ov_msckf --params-file /tmp/launch_params_bv0swm3_'].
+  clean 'Done!' / shutdown: 1
+  init OK: 1
+[INFO] [1784998652.692005320] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== axes_2 ===
+  samples from /ov_msckf/poseimu   : 1065
+  duration                       : 71.0 s
+  first-pose offset from origin  : 0.028 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 7.68 m
+  endpoint error |end - start|    : 0.081 m
+      x / y / z                  : -0.066 / -0.046 / +0.008 m
+  max |z - z_start|              : 0.680 m   <-- Z-divergence watch
+  DRIFT                          : 1.05 %  of path length
+  ACCEPT
+
+########## axes  run 3/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784998671.075258856] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998671.075473416] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784998671.097797224] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784998671.097946024] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784998671.098061576] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784998671.098120200] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784998671.098173832] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784998671.099527880] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998820.219187304] [rclcpp]: signal_handler(SIGINT/SIGTERM)

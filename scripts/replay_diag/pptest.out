@@ -1,0 +1,62 @@
+
+########## mono ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995542.041142760] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995542.041294312] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784995542.050441384] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995542.050530344] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995542.050559528] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995542.050582888] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995542.050603464] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995542.051391912] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995671.527962504] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,63 compute disp: 0,63 compute disp: 0,63 compute disp: 0,63 compute disp: 0,63 compute disp: 0,63 
+  disparity      : disparity is 2.453,0.662 disparity is 2.248,0.777 disparity is 2.295,0.552 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 239
+  final internal : q_GtoI = -0.549,0.463,-0.426,0.550 | p_IinG = 19.348,24.561,2.727 | dist = 34.72 (meters)
+[INFO] [1784995681.755106760] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== mono ===
+  samples from /ov_msckf/poseimu   : 917
+  duration                       : 61.1 s
+  first-pose offset from origin  : 0.001 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 37.30 m
+  endpoint error |end - start|    : 31.385 m
+      x / y / z                  : +19.347 / +24.562 / +2.728 m
+  max |z - z_start|              : 2.728 m   <-- Z-divergence watch
+  DRIFT                          : 84.15 %  of path length
+  ACCEPT
+
+########## pp ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995702.880334824] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995702.880487752] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784995702.893628776] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995702.893738824] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995702.893766472] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995702.893786952] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995702.893805032] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995702.894683464] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995832.355918248] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+/home/vajra/vps_replay_diag4/pptest.sh: line 24: 1909956 Killed                  setsid ros2 launch vps_uav_benchmarking "$LF" config_path:="$cfg/estimator_config.yaml" > ov.log 2>&1
+  pp republished : republished 3800
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,57 compute disp: 0,57 compute disp: 0,57 compute disp: 0,57 compute disp: 0,57 compute disp: 0,57 
+  disparity      : disparity is 0.759,2.107 disparity is 0.995,2.205 disparity is 1.052,2.635 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 159
+  final internal : q_GtoI = -0.548,0.464,-0.426,0.550 | p_IinG = 11.235,24.127,3.533 | dist = 29.39 (meters)
+[INFO] [1784995853.146049256] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== pp ===
+  samples from /ov_msckf/poseimu   : 921
+  duration                       : 61.4 s
+  first-pose offset from origin  : 0.053 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 31.88 m
+  endpoint error |end - start|    : 26.822 m
+      x / y / z                  : +11.184 / +24.121 / +3.533 m
+  max |z - z_start|              : 3.533 m   <-- Z-divergence watch
+  DRIFT                          : 84.14 %  of path length
+  ACCEPT
+
+PPTEST DONE

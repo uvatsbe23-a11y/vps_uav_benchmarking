@@ -1,0 +1,172 @@
+=== deltas: frozen vs shipped ===
+21,23c21,23
+< calib_cam_extrinsics: true      # let the filter refine T_cam_imu online (starts from the file value)
+< calib_cam_intrinsics: true
+< calib_cam_timeoffset: true      # refine timeshift_cam_imu online
+---
+> calib_cam_extrinsics: false
+> calib_cam_intrinsics: false
+> calib_cam_timeoffset: false
+58c58
+< init_dyn_use: false
+---
+> init_dyn_use: true
+=== deltas: loose vs frozen ===
+85,86c85,86
+< num_pts: 200
+< fast_threshold: 20
+---
+> num_pts: 400
+> fast_threshold: 10
+89,91c89,91
+< min_px_dist: 10
+< knn_ratio: 0.70
+< track_frequency: 21.0
+---
+> min_px_dist: 8
+> knn_ratio: 0.85
+> track_frequency: 31.0
+
+############### frozen  (rate 0.5) ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994067.584339976] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994067.584537096] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994067.605005064] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994067.605156168] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994067.605224744] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994067.605281672] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994067.605334888] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994067.606721096] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL     : 1 / 0
+  num_feats old,new: compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,71 
+  disparity vals   : disparity is 64.052,42.379 disparity is 64.291,47.035 disparity is 63.102,44.890 
+  UPDATE-MSCKF     : 0    UPDATE-SLAM: 0
+  ZUPT accepted    : 9
+  final internal   : q_GtoI = 0.026,-0.010,-0.551,0.834 | p_IinG = 2.452,-50.544,7.970 | dist = 82.76 (meters)
+[INFO] [1784994159.438985160] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== frozen ===
+  samples from /ov_msckf/odomimu   : 17857
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.813 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 126.70 m
+  endpoint error |end - start|    : 50.842 m
+      x / y / z                  : +1.973 / -50.214 / +7.722 m
+  max |z - z_start|              : 7.722 m   <-- Z-divergence watch
+  DRIFT                          : 40.13 %  of path length
+  ACCEPT
+
+############### freq30  (rate 0.5) ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994181.112523400] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994181.112678920] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994181.125628360] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994181.125738824] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994181.125772392] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994181.125798920] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994181.125822984] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994181.127060584] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL     : 1 / 0
+  num_feats old,new: compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,72 
+  disparity vals   : disparity is 70.753,53.292 disparity is 70.828,54.251 disparity is 70.929,49.593 
+  UPDATE-MSCKF     : 0    UPDATE-SLAM: 0
+  ZUPT accepted    : 130
+  final internal   : q_GtoI = -0.014,-0.040,-0.640,0.767 | p_IinG = 26.401,-21.494,35.229 | dist = 72.99 (meters)
+[INFO] [1784994272.966431496] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== freq30 ===
+  samples from /ov_msckf/odomimu   : 17195
+  duration                       : 37.3 s
+  first-pose offset from origin  : 1.347 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 124.45 m
+  endpoint error |end - start|    : 49.949 m
+      x / y / z                  : +27.722 / -22.096 / +35.188 m
+  max |z - z_start|              : 35.326 m   <-- Z-divergence watch
+  DRIFT                          : 40.14 %  of path length
+  ACCEPT
+
+############### binoc  (rate 0.5) ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994294.531031368] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994294.531176584] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994294.542632744] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994294.542735368] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994294.542768168] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994294.542789480] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994294.542806152] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994294.543645736] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL     : 1 / 0
+  num_feats old,new: compute disp: 0,78 compute disp: 0,86 compute disp: 0,86 compute disp: 0,94 
+  disparity vals   : disparity is 43.179,33.266 disparity is 50.905,39.527 disparity is 51.115,19.593 
+  UPDATE-MSCKF     : 0    UPDATE-SLAM: 0
+  ZUPT accepted    : 10
+  final internal   : q_GtoI = -0.259,-0.097,-0.842,0.463 | p_IinG = 724.098,-536.030,486.948 | dist = 1545.65 (meters)
+[INFO] [1784994386.392413288] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== binoc ===
+  samples from /ov_msckf/odomimu   : 17410
+  duration                       : 36.4 s
+  first-pose offset from origin  : 5.551 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  REJECT: first pose far from origin - stale/zombie estimator on the topic,
+          or fast-propagator blow-up before init. Kill leftover nodes and re-run.
+  (no odom recorded)
+
+############### loose  (rate 0.5) ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994407.983969032] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994407.984120744] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994407.996945800] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994407.997047880] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994407.997086184] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994407.997115720] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994407.997140200] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994407.998408776] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL     : 1 / 0
+  num_feats old,new: compute disp: 0,127 compute disp: 0,127 compute disp: 0,127 compute disp: 0,120 
+  disparity vals   : disparity is 48.797,52.961 disparity is 48.302,53.270 disparity is 48.136,47.783 
+  UPDATE-MSCKF     : 0    UPDATE-SLAM: 0
+  ZUPT accepted    : 51
+  final internal   : q_GtoI = 0.031,-0.014,-0.658,0.752 | p_IinG = -15.636,-13.862,9.974 | dist = 26.32 (meters)
+[INFO] [1784994499.821766184] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== loose ===
+  samples from /ov_msckf/odomimu   : 16627
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.210 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 32.68 m
+  endpoint error |end - start|    : 23.374 m
+      x / y / z                  : -15.786 / -14.084 / +9.939 m
+  max |z - z_start|              : 9.939 m   <-- Z-divergence watch
+  DRIFT                          : 71.52 %  of path length
+  ACCEPT
+
+############### loose_rate1  (rate 1.0) ###############
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994521.615673736] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994521.615949096] [rosbag2_player]: Set rate to 1
+[INFO] [1784994521.638598984] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994521.638745256] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994521.638810600] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994521.638861160] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994521.638900456] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994521.640063688] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL     : 1 / 0
+  num_feats old,new: compute disp: 0,127 compute disp: 0,127 compute disp: 0,127 compute disp: 0,120 
+  disparity vals   : disparity is 48.797,52.961 disparity is 48.302,53.270 disparity is 48.136,47.783 
+  UPDATE-MSCKF     : 0    UPDATE-SLAM: 0
+  ZUPT accepted    : 61
+  final internal   : q_GtoI = 0.038,0.024,-0.676,0.736 | p_IinG = 37.204,-98.270,-1.086 | dist = 133.86 (meters)
+[INFO] [1784994573.134164936] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== loose_rate1 ===
+  samples from /ov_msckf/odomimu   : 5316
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.675 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 181.23 m
+  endpoint error |end - start|    : 106.882 m
+      x / y / z                  : +38.492 / -99.705 / -1.042 m
+  max |z - z_start|              : 7.639 m   <-- Z-divergence watch
+  DRIFT                          : 58.98 %  of path length
+  ACCEPT
+
+KLTTEST DONE

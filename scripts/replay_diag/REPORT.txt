@@ -1,0 +1,288 @@
+=== ENV ===
+sourced /opt/ros/humble/setup.bash
+sourced /home/vajra/ros2_ws
+ROS_DISTRO=humble  ROS_DOMAIN_ID=0  ROS_LOCALHOST_ONLY=1
+BAG = /home/vajra/stage1_axes_v6sept
+
+=== variant deltas vs shipped ===
+--- dyninit ---
+58c58
+< init_dyn_use: false
+---
+> init_dyn_use: true
+--- dispwide ---
+56c56
+< init_max_disparity: 10.0
+---
+> init_max_disparity: 25.0
+--- dyninit_dbg ---
+14c14
+< verbosity: "INFO"
+---
+> verbosity: "DEBUG"
+58c58
+< init_dyn_use: false
+---
+> init_dyn_use: true
+
+########################## RUN: base ##########################
+  env clean (no estimator, no live camera driver)
+  estimator pids: 1640367    ov topics: 25
+  playing bag (rate 0.5)...
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992018.301372904] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992018.301497320] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992018.310687176] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992018.310758440] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992018.310782280] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992018.310800712] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992018.310815912] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992018.311650920] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  ---- init / disparity ----
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,81 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 21.424,51.388 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: no accel jerk detected, platform moving too much
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 29.343,59.885 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: no accel jerk detected, platform moving too much
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 29.521,66.434 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: no accel jerk detected, platform moving too much
+  ---- counts ----
+  init OK        : 1
+  init FAILED    : 47
+  UPDATE-MSCKF   : 0
+  UPDATE-SLAM    : 0
+  ZUPT accepted  : 4
+  ---- sample [UPDATE-MSCKF] lines (feature usage) ----
+  ---- tracker feature counts (DEBUG only) ----
+  ---- filter internal final state ----
+    [run_subscribe_msckf-1] [0mq_GtoI = 0.006,-0.011,-0.994,0.112 | p_IinG = -15.252,-19.166,3.169 | dist = 34.94 (meters)
+  ---- trajectory ----
+  Messages:          11907
+                     Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 11375 | Serialization Format: cdr
+[INFO] [1784992109.148276872] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== base[bag] ===
+  samples from /ov_msckf/odomimu   : 11375
+  duration                       : 35.5 s
+  first-pose offset from origin  : 0.006 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 47.53 m
+  endpoint error |end - start|    : 24.795 m
+      x / y / z                  : -15.314 / -19.239 / +3.183 m
+  max |z - z_start|              : 3.183 m   <-- Z-divergence watch
+  DRIFT                          : 52.17 %  of path length
+  ACCEPT
+
+########################## RUN: dyninit ##########################
+  env clean (no estimator, no live camera driver)
+  estimator pids: 1655304    ov topics: 0
+  playing bag (rate 0.5)...
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992131.318533608] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992131.318941704] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992131.341949128] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992131.342063720] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992131.342114600] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992131.342161320] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992131.342209960] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992131.343594856] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  ---- init / disparity ----
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,78 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,78 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,78 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,78 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,71 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 39.055,53.448 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 48.376,47.766 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 34.457,45.196 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 26.788,45.067 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 35.169,51.779 (10.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 33.033,58.077 (10.00 thresh)
+  ---- counts ----
+  init OK        : 1
+  init FAILED    : 0
+  UPDATE-MSCKF   : 0
+  UPDATE-SLAM    : 0
+  ZUPT accepted  : 10
+  ---- sample [UPDATE-MSCKF] lines (feature usage) ----
+  ---- tracker feature counts (DEBUG only) ----
+  ---- filter internal final state ----
+    [run_subscribe_msckf-1] [0mq_GtoI = 0.046,0.075,-0.441,0.893 | p_IinG = 118.745,-0.501,27.022 | dist = 245.27 (meters)
+  ---- trajectory ----
+  Messages:          15451
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 14882 | Serialization Format: cdr
+[INFO] [1784992222.178095080] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== dyninit[bag] ===
+  samples from /ov_msckf/odomimu   : 14882
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.676 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 387.80 m
+  endpoint error |end - start|    : 122.259 m
+      x / y / z                  : +119.241 / -0.014 / +26.997 m
+  max |z - z_start|              : 26.997 m   <-- Z-divergence watch
+  DRIFT                          : 31.53 %  of path length
+  ACCEPT
+
+########################## RUN: dispwide ##########################
+  env clean (no estimator, no live camera driver)
+  estimator pids: 1670339    ov topics: 0
+  playing bag (rate 0.5)...
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992244.763275016] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992244.763393672] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992244.773072616] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992244.773141832] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992244.773164520] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992244.773181544] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992244.773194696] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992244.774002280] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  ---- init / disparity ----
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,42 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,62 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,84 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: not enough feats to compute disp: 0,81 < 15
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 21.424,51.388 (25.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: platform moving too much
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 29.343,59.885 (25.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: no accel jerk detected, platform moving too much
+[run_subscribe_msckf-1] [0m[33m[init]: disparity is 29.521,66.434 (25.00 thresh)
+[run_subscribe_msckf-1] [0m[33m[init]: failed static init: no accel jerk detected, platform moving too much
+  ---- counts ----
+  init OK        : 1
+  init FAILED    : 38
+  UPDATE-MSCKF   : 0
+  UPDATE-SLAM    : 0
+  ZUPT accepted  : 17
+  ---- sample [UPDATE-MSCKF] lines (feature usage) ----
+  ---- tracker feature counts (DEBUG only) ----
+  ---- filter internal final state ----
+    [run_subscribe_msckf-1] [0mq_GtoI = 0.002,-0.009,-0.999,0.050 | p_IinG = 20.661,9.337,-6.483 | dist = 34.35 (meters)
+  ---- trajectory ----
+  Messages:          11458
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 10918 | Serialization Format: cdr
+[INFO] [1784992335.619829064] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== dispwide[bag] ===
+  samples from /ov_msckf/odomimu   : 10918
+  duration                       : 36.0 s
+  first-pose offset from origin  : 0.088 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 50.56 m
+  endpoint error |end - start|    : 23.713 m
+      x / y / z                  : +20.799 / +9.340 / -6.517 m
+  max |z - z_start|              : 6.517 m   <-- Z-divergence watch
+  DRIFT                          : 46.90 %  of path length
+  ACCEPT
+
+########################## RUN: dyninit_dbg ##########################
+  env clean (no estimator, no live camera driver)
+  estimator pids: 1685333    ov topics: 0
+  playing bag (rate 0.5)...
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784992357.641374152] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784992357.641551944] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784992357.663982152] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784992357.664110248] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784992357.664168136] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784992357.664207336] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784992357.664237672] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784992357.665713448] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  ---- init / disparity ----
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0000 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,0 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,43 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0001 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+[run_subscribe_msckf-1] [0mVioManagerHelper.cpp:170 [33m[init]: failed initialization in 0.0002 seconds
+[run_subscribe_msckf-1] [0mInertialInitializer.cpp:123 [33m[init]: not enough feats to compute disp: 0,60 < 15
+  ---- counts ----
+  init OK        : 1
+  init FAILED    : 30
+  UPDATE-MSCKF   : 0
+  UPDATE-SLAM    : 0
+  ZUPT accepted  : 13
+  ---- sample [UPDATE-MSCKF] lines (feature usage) ----
+  ---- tracker feature counts (DEBUG only) ----
+    [run_subscribe_msckf-1] DynamicInitializer.cpp:313 [init-d]: system of 412 measurement x 186 states created (60 features, stereo)
+  ---- filter internal final state ----
+    [run_subscribe_msckf-1] [0mVioManager.cpp:654 q_GtoI = 0.055,0.036,-0.434,0.899 | p_IinG = 67.692,-59.205,37.049 | dist = 209.94 (meters)
+  ---- trajectory ----
+  Messages:          14010
+  Topic information: Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 13441 | Serialization Format: cdr
+[INFO] [1784992448.507185000] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== dyninit_dbg[bag] ===
+  samples from /ov_msckf/odomimu   : 13441
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.676 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 353.51 m
+  endpoint error |end - start|    : 97.209 m
+      x / y / z                  : +67.929 / -58.902 / +36.956 m
+  max |z - z_start|              : 36.956 m   <-- Z-divergence watch
+  DRIFT                          : 27.50 %  of path length
+  ACCEPT
+
+########################## REFERENCE: original live run ##########################
+[INFO] [1784992451.910176392] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+
+=== live_v6sept ===
+  samples from /ov_msckf/odomimu   : 6607
+  duration                       : 40.2 s
+  first-pose offset from origin  : 1543.068 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  REJECT: first pose far from origin - stale/zombie estimator on the topic,
+          or fast-propagator blow-up before init. Kill leftover nodes and re-run.
+
+DONE -> /home/vajra/vps_replay_diag4/REPORT.txt

@@ -1,0 +1,75 @@
+=== nz_min vs shipped ===
+21,23c21,23
+< calib_cam_extrinsics: true      # let the filter refine T_cam_imu online (starts from the file value)
+< calib_cam_intrinsics: true
+< calib_cam_timeoffset: true      # refine timeshift_cam_imu online
+---
+> calib_cam_extrinsics: false
+> calib_cam_intrinsics: false
+> calib_cam_timeoffset: false
+46c46
+< try_zupt: true
+---
+> try_zupt: false
+58c58
+< init_dyn_use: false
+---
+> init_dyn_use: true
+
+########## min ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994686.312780616] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994686.312932648] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994686.325220296] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994686.325324136] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994686.325362408] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994686.325390536] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994686.325413736] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994686.326310184] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,71 
+  disparity      : disparity is 64.052,42.379 disparity is 64.291,47.035 disparity is 63.102,44.890 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 0
+  final internal : q_GtoI = 0.055,0.040,-0.527,0.847 | p_IinG = -95.263,-109.978,-68.510 | dist = 177.60 (meters)
+[INFO] [1784994778.202372424] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== min ===
+  samples from /ov_msckf/odomimu   : 17857
+  duration                       : 37.3 s
+  first-pose offset from origin  : 0.809 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 226.80 m
+  endpoint error |end - start|    : 162.238 m
+      x / y / z                  : -96.352 / -110.664 / -69.218 m
+  max |z - z_start|              : 69.218 m   <-- Z-divergence watch
+  DRIFT                          : 71.53 %  of path length
+  ACCEPT
+
+########## loose ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784994799.889766824] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+[INFO] [1784994799.889909288] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784994799.898912936] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784994799.899003752] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784994799.899038536] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784994799.899065544] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784994799.899089096] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784994799.899895304] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_v6sept/stage1_axes_v6sept_0.db3' for READ_ONLY.
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,84 compute disp: 0,84 compute disp: 0,84 compute disp: 0,101 compute disp: 0,96 
+  disparity      : disparity is 51.287,39.421 disparity is 47.887,29.955 disparity is 40.030,23.610 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 0
+  final internal : q_GtoI = 0.038,-0.007,-0.605,0.795 | p_IinG = 92.356,-89.345,37.220 | dist = 135.75 (meters)
+[INFO] [1784994891.741289288] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== loose ===
+  samples from /ov_msckf/odomimu   : 16338
+  duration                       : 36.3 s
+  first-pose offset from origin  : 0.025 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 143.82 m
+  endpoint error |end - start|    : 134.365 m
+      x / y / z                  : +92.841 / -89.668 / +37.341 m
+  max |z - z_start|              : 37.341 m   <-- Z-divergence watch
+  DRIFT                          : 93.43 %  of path length
+  ACCEPT
+
+NOZUPT_TEST DONE

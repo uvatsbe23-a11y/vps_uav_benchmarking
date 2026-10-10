@@ -1,0 +1,34 @@
+ov topics: 25
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995978.917664840] [rosbag2_storage]: Opened database '/home/vajra/datasets/euroc/V1_01_easy_ros2/V1_01_easy_ros2.db3' for READ_ONLY.
+[INFO] [1784995978.917837224] [rosbag2_player]: Set rate to 1
+[INFO] [1784995978.935867880] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995978.936021448] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995978.936090056] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995978.936149256] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995978.936204296] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995978.937329256] [rosbag2_storage]: Opened database '/home/vajra/datasets/euroc/V1_01_easy_ros2/V1_01_easy_ros2.db3' for READ_ONLY.
+/home/vajra/vps_replay_diag4/euroctest.sh: line 11: 1915814 Killed                  setsid ros2 launch vps_uav_benchmarking "$LF" config_path:="$EUCFG" > ov.log 2>&1
+=== EUROC V1_01_easy result ===
+  init OK/FAIL   : 1 / 84
+  num_feats o,n  : compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 compute disp: 0,76 
+  disparity      : disparity is 1.038,4.803 disparity is 0.496,7.357 disparity is 0.804,12.072 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 0
+  final internal : q_GtoI = 0.772,-0.273,0.538,0.200 | p_IinG = -0.669,-0.402,-0.161 | dist = 56.58 (meters)
+  Messages:          20793
+  Topic information: Topic: /ov_msckf/poseimu | Type: geometry_msgs/msg/PoseWithCovarianceStamped | Count: 2800 | Serialization Format: cdr
+                     Topic: /ov_msckf/odomimu | Type: nav_msgs/msg/Odometry | Count: 17993 | Serialization Format: cdr
+[INFO] [1784996147.311849000] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== euroc_V1_01 ===
+  samples from /ov_msckf/poseimu   : 2800
+  duration                       : 139.9 s
+  first-pose offset from origin  : 0.017 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 57.00 m
+  endpoint error |end - start|    : 0.797 m
+      x / y / z                  : -0.678 / -0.387 / -0.163 m
+  max |z - z_start|              : 0.657 m   <-- Z-divergence watch
+  DRIFT                          : 1.40 %  of path length
+  ACCEPT
+
+EUROCTEST DONE

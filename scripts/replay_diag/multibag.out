@@ -1,0 +1,114 @@
+
+########## BAG: stage1_static  (rate 3.0, ~90s) ##########
+  Duration:          431.145911104s
+                     Topic: /camera/right_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 12920 | Serialization Format: cdr
+                     Topic: /camera/left_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 12920 | Serialization Format: cdr
+                     Topic: /camera/gyro_accel/sample | Type: sensor_msgs/msg/Imu | Count: 212624 | Serialization Format: cdr
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995060.479954728] [rosbag2_storage]: Opened database '/home/vajra/stage1_static/stage1_static_0.db3' for READ_ONLY.
+[INFO] [1784995060.480118792] [rosbag2_player]: Set rate to 3
+[INFO] [1784995060.489797160] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995060.489899592] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995060.489933032] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995060.489957672] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995060.489976808] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995060.490775688] [rosbag2_storage]: Opened database '/home/vajra/stage1_static/stage1_static_0.db3' for READ_ONLY.
+[INFO] [1784995149.966310120] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 compute disp: 0,78 
+  disparity      : disparity is 0.557,0.410 disparity is 0.601,0.420 disparity is 0.598,0.451 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 3891
+  final internal : 
+[INFO] [1784995160.169936616] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== stage1_static[poseimu] ===
+  samples from /ov_msckf/poseimu   : 0
+  REJECT: only 0 pose(s); need >= 2.
+
+########## BAG: stage1_axes_6sept  (rate 0.5, ~90s) ##########
+  Duration:          28.143872864s
+  Topic information: Topic: /camera/right_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 835 | Serialization Format: cdr
+                     Topic: /camera/left_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 835 | Serialization Format: cdr
+                     Topic: /camera/gyro_accel/sample | Type: sensor_msgs/msg/Imu | Count: 13743 | Serialization Format: cdr
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995178.747158184] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_6sept/stage1_axes_6sept_0.db3' for READ_ONLY.
+[INFO] [1784995178.747362248] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784995178.770897512] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995178.771049672] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995178.771135240] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995178.771214728] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995178.771286056] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995178.772705032] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes_6sept/stage1_axes_6sept_0.db3' for READ_ONLY.
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,70 compute disp: 0,70 compute disp: 0,70 compute disp: 0,70 compute disp: 0,70 compute disp: 0,69 
+  disparity      : disparity is 5.575,2.364 disparity is 6.726,1.742 disparity is 5.656,2.072 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 1
+  final internal : q_GtoI = -0.636,0.249,-0.232,0.693 | p_IinG = 24.068,-11.537,2.227 | dist = 54.39 (meters)
+[INFO] [1784995245.244300744] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== stage1_axes_6sept[poseimu] ===
+  samples from /ov_msckf/poseimu   : 382
+  duration                       : 25.4 s
+  first-pose offset from origin  : 0.098 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 92.90 m
+  endpoint error |end - start|    : 26.834 m
+      x / y / z                  : +24.151 / -11.483 / +2.221 m
+  max |z - z_start|              : 2.221 m   <-- Z-divergence watch
+  DRIFT                          : 28.88 %  of path length
+  ACCEPT
+
+########## BAG: jetson_stereo_motion_drift_test  (rate 0.5, ~40s) ##########
+  Duration:          14.479527148s
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995263.711341096] [rosbag2_storage]: Opened database '/home/vajra/jetson_stereo_motion_drift_test/jetson_stereo_motion_drift_test_0.db3' for READ_ONLY.
+[INFO] [1784995263.711474088] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784995263.715556968] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995263.715636200] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995263.715670952] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995263.715699688] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995263.715726856] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995263.716483816] [rosbag2_storage]: Opened database '/home/vajra/jetson_stereo_motion_drift_test/jetson_stereo_motion_drift_test_0.db3' for READ_ONLY.
+  init OK/FAIL   : 0 / 0
+  num_feats o,n  : 
+  disparity      : 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 0
+  final internal : 
+[INFO] [1784995273.936865192] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== jetson_stereo_motion_drift_test[poseimu] ===
+  samples from /ov_msckf/poseimu   : 0
+  REJECT: only 0 pose(s); need >= 2.
+
+########## BAG: stage1_axes  (rate 0.5, ~90s) ##########
+  Duration:          100.188078016s
+  Topic information: Topic: /camera/right_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 2975 | Serialization Format: cdr
+                     Topic: /camera/left_ir/image_raw | Type: sensor_msgs/msg/Image | Count: 2975 | Serialization Format: cdr
+                     Topic: /camera/gyro_accel/sample | Type: sensor_msgs/msg/Imu | Count: 9796 | Serialization Format: cdr
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784995292.123142696] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995292.123274760] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784995292.137979464] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784995292.138085576] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784995292.138120904] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784995292.138150760] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784995292.138181576] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784995292.139073448] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784995381.608155272] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [1784995381.609683816] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  init OK/FAIL   : 1 / 0
+  num_feats o,n  : compute disp: 0,73 compute disp: 0,73 compute disp: 0,73 compute disp: 0,73 compute disp: 0,73 compute disp: 0,73 
+  disparity      : disparity is 0.751,0.966 disparity is 0.835,0.913 disparity is 0.797,0.985 
+  UPDATE-MSCKF   : 0   SLAM: 0   ZUPT: 107
+  final internal : q_GtoI = -0.530,0.418,-0.400,0.620 | p_IinG = -2.152,3.411,1.140 | dist = 8.73 (meters)
+[INFO] [1784995391.818814728] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== stage1_axes[poseimu] ===
+  samples from /ov_msckf/poseimu   : 620
+  duration                       : 41.3 s
+  first-pose offset from origin  : 0.004 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.59 m
+  endpoint error |end - start|    : 4.189 m
+      x / y / z                  : -2.148 / +3.411 / +1.141 m
+  max |z - z_start|              : 1.141 m   <-- Z-divergence watch
+  DRIFT                          : 43.70 %  of path length
+  ACCEPT
+
+MULTIBAG DONE

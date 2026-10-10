@@ -1,0 +1,84 @@
+
+########## verify run 1/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784998949.282005768] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784998949.282153288] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784998949.291891912] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784998949.291982920] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784998949.292017448] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784998949.292044232] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784998949.292069416] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784998949.292865320] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784999098.768792008] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  SIGABRT/died/assert : 0
+  exit code line      : [run_subscribe_msckf-1]: process has finished cleanly [pid 1999459]
+  init OK             : 1
+[INFO] [1784999110.933974856] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== vp_1 ===
+  samples from /ov_msckf/poseimu   : 1070
+  duration                       : 71.3 s
+  first-pose offset from origin  : 0.265 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.14 m
+  endpoint error |end - start|    : 0.105 m
+      x / y / z                  : +0.024 / +0.077 / -0.067 m
+  max |z - z_start|              : 0.627 m   <-- Z-divergence watch
+  DRIFT                          : 1.15 %  of path length
+  ACCEPT
+
+########## verify run 2/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784999128.948948456] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784999128.949096360] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784999128.958750056] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784999128.958848296] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784999128.958882568] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784999128.958911368] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784999128.958938632] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784999128.959805864] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784999278.432884392] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [1784999278.434229928] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  SIGABRT/died/assert : 0
+  exit code line      : [run_subscribe_msckf-1]: process has finished cleanly [pid 2006105]
+  init OK             : 1
+[INFO] [1784999290.595893672] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== vp_2 ===
+  samples from /ov_msckf/poseimu   : 1070
+  duration                       : 71.3 s
+  first-pose offset from origin  : 0.265 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.14 m
+  endpoint error |end - start|    : 0.105 m
+      x / y / z                  : +0.024 / +0.077 / -0.067 m
+  max |z - z_start|              : 0.627 m   <-- Z-divergence watch
+  DRIFT                          : 1.15 %  of path length
+  ACCEPT
+
+########## verify run 3/3 ##########
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1784999308.624061448] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784999308.624204840] [rosbag2_player]: Set rate to 0.5
+[INFO] [1784999308.634919272] [rosbag2_player]: Adding keyboard callbacks.
+[INFO] [1784999308.635006728] [rosbag2_player]: Press SPACE for Pause/Resume
+[INFO] [1784999308.635037224] [rosbag2_player]: Press CURSOR_RIGHT for Play Next Message
+[INFO] [1784999308.635058184] [rosbag2_player]: Press CURSOR_UP for Increase Rate 10%
+[INFO] [1784999308.635076456] [rosbag2_player]: Press CURSOR_DOWN for Decrease Rate 10%
+[INFO] [1784999308.635922440] [rosbag2_storage]: Opened database '/home/vajra/stage1_axes/stage1_axes_0.db3' for READ_ONLY.
+[INFO] [1784999458.111342088] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+  SIGABRT/died/assert : 0
+  exit code line      : [run_subscribe_msckf-1]: process has finished cleanly [pid 2012738]
+  init OK             : 1
+[INFO] [1784999470.271654760] [rosbag2_storage]: Opened database 'out/out_0.db3' for READ_ONLY.
+
+=== vp_3 ===
+  samples from /ov_msckf/poseimu   : 1070
+  duration                       : 71.3 s
+  first-pose offset from origin  : 0.265 m   (limit 5.0)
+  NaN/Inf position samples       : 0
+  integrated path length         : 9.14 m
+  endpoint error |end - start|    : 0.105 m
+      x / y / z                  : +0.024 / +0.077 / -0.067 m
+  max |z - z_start|              : 0.627 m   <-- Z-divergence watch
+  DRIFT                          : 1.15 %  of path length
+  ACCEPT
+
+VERIFY_PATCH DONE
