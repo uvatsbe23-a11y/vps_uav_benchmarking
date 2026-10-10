@@ -36,6 +36,12 @@ feat_rep_msckf: "GLOBAL_3D"
 feat_rep_slam: "ANCHORED_MSCKF_INVERSE_DEPTH"
 feat_rep_aruco: "ANCHORED_MSCKF_INVERSE_DEPTH"
 
+# ---- aruco tag tracking + feature mask: unused, but required keys in OpenVINS v2.7 ----
+use_aruco: false
+num_aruco: 1024
+downsize_aruco: true
+use_mask: false
+
 # ---- zero-velocity update: helps a lot for the static test and takeoff/landing ----
 try_zupt: true
 zupt_chi2_multipler: 0
@@ -50,9 +56,25 @@ init_imu_thresh: 1.0            # accel jerk (m/s^2) needed to start; give it a 
 init_max_disparity: 10.0
 init_max_features: 75
 init_dyn_use: false
+# dynamic initializer is off (init_dyn_use: false) but OpenVINS v2.7 still
+# parses these as required - values copied from the stock orbbec_335l_stereo_ir config
+init_dyn_mle_opt_calib: false
+init_dyn_mle_max_iter: 100
+init_dyn_mle_max_time: 0.5
+init_dyn_mle_max_threads: 6
+init_dyn_num_pose: 4
+init_dyn_min_deg: 2.0
+init_dyn_inflation_ori: 10
+init_dyn_inflation_vel: 100
+init_dyn_inflation_bg: 10
+init_dyn_inflation_ba: 100
+init_dyn_min_rec_cond: 1e-12
+init_dyn_bias_g: [ 0.0, 0.0, 0.0 ]
+init_dyn_bias_a: [ 0.0, 0.0, 0.0 ]
 
 # ---- state logging (written to the working directory OpenVINS is started from) ----
 record_timing_information: false
+record_timing_filepath: "/tmp/traj_timing.txt"   # required key even when the flag above is false
 save_total_state: true
 filepath_est: "state_estimate.txt"
 filepath_std: "state_deviation.txt"

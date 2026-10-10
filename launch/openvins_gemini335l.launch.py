@@ -31,6 +31,7 @@ def generate_launch_description():
         package="ov_msckf",
         executable="run_subscribe_msckf",
         name="ov_msckf",
+        namespace="ov_msckf",
         output="screen",
         parameters=[{
             "config_path": LaunchConfiguration("config_path"),

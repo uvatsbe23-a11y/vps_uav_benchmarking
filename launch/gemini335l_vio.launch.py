@@ -42,13 +42,14 @@ def generate_launch_description():
         "enable_sync_output_accel_gyro": "true", # -> /camera/gyro_accel/sample
         "enable_accel": "true",
         "enable_gyro": "true",
-        "accel_rate": "400hz",
-        "gyro_rate": "400hz",
+        "accel_rate": "500hz",
+        "gyro_rate": "500hz",
         "accel_range": "4g",
         "gyro_range": "1000dps",
         "enable_color": "false",
         "enable_depth": "false",
-        "time_domain": "system",                 # publish ROS/host time on headers
+        "time_domain": "global",                 # publish ROS/host time on headers
+        "enable_sync_host_time": "true"
     }
 
     return LaunchDescription([
