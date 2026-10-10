@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# flight_logs [camera|openvins|recorder] - follow a log of the current session (Ctrl+C stops only the viewer).
+source "$(dirname "$(readlink -f "$0")")/flight_common.sh"
+[ -L "$CUR" ] || { yel "No session."; exit 1; }
+exec tail -n 30 -f "$(readlink -f "$CUR")/${1:-openvins}.log"

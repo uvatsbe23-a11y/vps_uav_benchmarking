@@ -1,0 +1,7 @@
+[Unit]
+Description=Restore clock after RTC %i registered
+DefaultDependencies=no
+After=local-fs.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/clock-restore restore udev-%i

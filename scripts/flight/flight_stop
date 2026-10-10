@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# flight_stop - stop recorder (cleanly), then OpenVINS and camera; summarise the flight.
+source "$(dirname "$(readlink -f "$0")")/flight_common.sh"
+[ -L "$CUR" ] || { yel "No session."; }
+S=$(readlink -f "$CUR" 2>/dev/null)
+if [ -n "$S" ]; then
+  if alive "$S/recorder.pid"; then
+    echo "Stopping recorder (writing the last data can take up to a minute)..."
+    stop_pid "$S/recorder.pid" 90 && green "  recorder stopped cleanly" || red "  recorder had to be KILLED - run: ros2 bag reindex $S/bag"
+  fi
+  echo "Stopping OpenVINS and camera..."
+  stop_pid "$S/openvins.pid" 10 || red "  OpenVINS had to be killed"
+  stop_pid "$S/camera.pid" 15   || red "  camera had to be killed"
+fi
+sleep 1
+if r=$(ros_running); then
+  yel "Leftover processes (stopping them):"; echo "$r"
+  for p in $(echo "$r" | awk '{print $1}'); do kill -INT "$p" 2>/dev/null; done; sleep 5
+  for p in $(echo "$r" | awk '{print $1}'); do kill -KILL "$p" 2>/dev/null; done
+fi
+[ -n "$S" ] || exit 0
+echo; echo "== Summary: $S"
+if [ -s "$S/bag/metadata.yaml" ]; then
+  ros2 bag info "$S/bag" 2>/dev/null | grep -E "Duration|Bag size|image_raw |gyro_accel|poseimu" | sed 's/| Serialization Format: cdr//; s/^/  /'
+elif [ -d "$S/bag" ]; then red "  bag has NO metadata - run: ros2 bag reindex $S/bag"
+else echo "  (no bag recorded)"; fi
+if grep -q "process has died" "$S/openvins.log" 2>/dev/null; then
+  red "  OpenVINS CRASHED during the session: $(grep 'process has died' "$S/openvins.log" | grep -o 'exit code [-0-9]*' | head -1)"
+else
+  green "  OpenVINS: no crash recorded"
+fi
+grep -q "successful initialization" "$S/openvins.log" 2>/dev/null || yel "  OpenVINS never initialised in this session"
+c=$(find /var/crash/cores -newer "$S/session.txt" -name 'core.*' 2>/dev/null)
+[ -n "$c" ] && red "  NEW CORE DUMP(S): $c"
+echo "  stopped: $(date)" >> "$S/session.txt"
+rm -f "$CUR"
+green "Done. Next flight: flight_start"

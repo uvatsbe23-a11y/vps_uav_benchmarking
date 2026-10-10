@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# flight_status [-w] - state of the current flight session (-w: refresh every 3 s).
+source "$(dirname "$(readlink -f "$0")")/flight_common.sh"
+show() {
+  [ -L "$CUR" ] || { yel "No session - run flight_start."; return; }
+  S=$(readlink -f "$CUR")
+  echo "== $(basename "$S")   $(date +%T)   clock: $(clock_state)   disk: $(df -h --output=avail "$HOME" | tail -1 | tr -d ' ') free"
+  for n in camera openvins recorder; do
+    if alive "$S/$n.pid"; then green "  $n: running"; elif [ -f "$S/$n.pid" ]; then red "  $n: NOT running"; else echo "  $n: not started"; fi
+  done
+  if [ -f "$S/openvins.log" ] && grep -q "process has died" "$S/openvins.log"; then
+    red "  OpenVINS CRASHED: $(grep -m1 'process has died' "$S/openvins.log" | grep -o 'exit code [-0-9]*')"
+    ls -t /var/crash/cores/core.run_subscribe* 2>/dev/null | head -1 | sed 's/^/  core dump: /'
+  fi
+  if alive "$S/openvins.pid"; then
+    hz=$(topic_hz /ov_msckf/poseimu 3)
+    if [ -n "$hz" ]; then
+      p=$(timeout 3 ros2 topic echo --once --field pose.pose.position /ov_msckf/poseimu 2>/dev/null | awk '/^x:/{x=$2}/^y:/{y=$2}/^z:/{z=$2}END{printf "x %.2f  y %.2f  z %.2f m", x, y, z}')
+      green "  OpenVINS: INITIALISED, ${hz} Hz   $p"
+    elif grep -q "successful initialization" "$S/openvins.log" 2>/dev/null; then
+      red "  OpenVINS: initialised earlier but NO OUTPUT NOW (stalled?) - see flight_logs"
+    else
+      yel "  OpenVINS: not initialised yet - lift and slide the drone gently"
+    fi
+  fi
+  if [ -d "$S/bag" ]; then
+    sz=$(du -sh "$S/bag" 2>/dev/null | cut -f1)
+    el=$(( $(date +%s) - $(stat -c %Y "$S/recorder.pid" 2>/dev/null || date +%s) ))
+    alive "$S/recorder.pid" && green "  recording: $sz  (~${el}s)" || echo "  bag: $sz  (recorder stopped)"
+  fi
+}
+if [ "$1" = -w ]; then while true; do clear; show; sleep 3; done; else show; fi

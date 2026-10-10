@@ -1,0 +1,26 @@
+#!/bin/sh
+# Offline clock backstop for a Jetson whose RTC has no battery.
+#   restore : never let the system clock be earlier than the last saved stamp
+#   save    : store the current time, but NEVER move the stamp backwards
+# 'restore' runs early in boot (clock-restore.service), whenever an RTC device
+# registers (udev -> clock-restore-rtc@.service: the nvvrs RTC driver resets the
+# clock to 1970 ~0.3 s after the early run), and 20 s after boot as a backstop.
+# It must run as a systemd service: udev's own RUN+= sandbox cannot set the time.
+STAMP=/var/lib/clock-restore/stamp
+n=$(date -u +%s)
+s=$(cat "$STAMP" 2>/dev/null); case "$s" in ''|*[!0-9]*) s=0 ;; esac
+case "$1" in
+  save)
+    mkdir -p /var/lib/clock-restore
+    if [ "$n" -gt "$s" ]; then
+      echo "$n" > "$STAMP".tmp && mv "$STAMP".tmp "$STAMP"
+    fi ;;
+  restore)
+    if [ "$n" -lt "$s" ]; then
+      if date -u -s "@$s" >/dev/null 2>&1; then
+        logger -t clock-restore "advanced clock to $(date -u -d @$s) (${2:-boot})"
+      else
+        logger -t clock-restore "FAILED to set clock (${2:-boot})"; exit 1
+      fi
+    fi ;;
+esac

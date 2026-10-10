@@ -1,0 +1,6 @@
+[Unit]
+Description=Re-run clock restore 20 s after boot
+[Timer]
+OnBootSec=20s
+[Install]
+WantedBy=timers.target

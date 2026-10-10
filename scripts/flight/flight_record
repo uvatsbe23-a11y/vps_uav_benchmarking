@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# flight_record - start recording the raw-topic bag into the current session.
+source "$(dirname "$(readlink -f "$0")")/flight_common.sh"
+[ -L "$CUR" ] || { red "No session - run flight_start first."; exit 1; }
+S=$(readlink -f "$CUR")
+alive "$S/recorder.pid" && { yel "Already recording in $S/bag"; exit 0; }
+[ -d "$S/bag" ] && { red "$S already has a bag - run flight_stop, then flight_start for the next flight."; exit 1; }
+alive "$S/openvins.pid" || { red "OpenVINS is not running."; exit 1; }
+if [ -z "$(topic_hz /ov_msckf/poseimu 3)" ]; then
+  yel "OpenVINS is NOT initialised yet (no live estimate for this flight; raw data is still recorded)."
+  read -r -p "Record anyway? [y/N] " a; [ "$a" = y ] || exit 1
+fi
+start_bg "$S" recorder "$PKG_LIB/record_bag.sh" "$S/bag"
+for _ in $(seq 1 10); do sleep 1; grep -q "Recording" "$S/recorder.log" 2>/dev/null && break; done
+if grep -q "Recording" "$S/recorder.log" 2>/dev/null && alive "$S/recorder.pid"; then
+  green "RECORDING -> $S/bag      (stop after landing with: flight_stop)"
+else
+  red "Recorder did not start:"; tail -5 "$S/recorder.log"; exit 1
+fi

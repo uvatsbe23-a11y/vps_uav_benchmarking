@@ -1,0 +1,13 @@
+[Unit]
+Description=Restore clock from last-known-good stamp (offline fake-hwclock)
+DefaultDependencies=no
+After=local-fs.target
+Before=sysinit.target time-set.target systemd-timesyncd.service
+ConditionPathExists=/var/lib/clock-restore/stamp
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/clock-restore restore
+ExecStop=/usr/local/sbin/clock-restore save
+[Install]
+WantedBy=sysinit.target

@@ -1,0 +1,5 @@
+[Unit]
+Description=Save clock stamp
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/clock-restore save

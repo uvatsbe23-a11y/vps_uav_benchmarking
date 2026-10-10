@@ -1,0 +1,3 @@
+# After an RTC driver registers (it resets the clock to 1970), re-apply the saved
+# time via a systemd service (udev RUN+= is sandboxed and cannot set the clock).
+ACTION=="add", SUBSYSTEM=="rtc", TAG+="systemd", ENV{SYSTEMD_WANTS}+="clock-restore-rtc@%k.service"

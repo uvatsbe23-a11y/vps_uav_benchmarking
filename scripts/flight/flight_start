@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# flight_start - preflight checks, then camera + OpenVINS in a new session folder.
+# Next: lift/slide the drone to initialise, check with flight_status, then flight_record.
+source "$(dirname "$(readlink -f "$0")")/flight_common.sh"
+
+if r=$(ros_running); then red "Already running - run flight_stop first:"; echo "$r"; exit 1; fi
+
+case $(clock_state) in
+  BAD)      red "Clock is $(date). Run on the ground PC:  ~/vps_tools/sync_jetson_clock.sh"; exit 1 ;;
+  RESTORED) yel "Clock $(date) was restored from the last saved time - NOT synced this boot."
+            yel "Telemetry matching needs the real time: run ~/vps_tools/sync_jetson_clock.sh on the PC."
+            read -r -p "Continue anyway? [y/N] " a; [ "$a" = y ] || exit 1 ;;
+  OK)       green "Clock OK: $(date)" ;;
+esac
+
+free=$(df -BG --output=avail "$HOME" | tail -1 | tr -dc 0-9)
+if [ "$free" -lt 15 ]; then red "Only ${free} GB free (a flight needs 4-9 GB). Free space first."; exit 1; fi
+[ "$free" -lt 40 ] && yel "Disk: ${free} GB free (~$((free / 7)) flights)." || green "Disk: ${free} GB free"
+
+pm=$(nvpmodel -q 2>/dev/null | head -1)
+case "$pm" in *MAXN_SUPER*) green "Power: $pm" ;; *) yel "Power: $pm  (expected MAXN_SUPER: sudo nvpmodel -m 2)";; esac
+
+echo "Locking clocks (sudo password may be asked)..."
+sudo jetson_clocks || { red "jetson_clocks failed"; exit 1; }
+sudo systemctl stop packagekit 2>/dev/null
+for p in $(pgrep -f '[u]pdate-manager'); do kill "$p" 2>/dev/null; done
+
+day="$FLIGHTS/$(date +%F)"; mkdir -p "$day"
+n=$(( $(ls -d "$day"/flight[0-9]* 2>/dev/null | wc -l) + 1 ))
+S="$day/$(printf 'flight%02d' "$n")_$(date +%H%M%S)"; mkdir -p "$S"; ln -sfn "$S" "$CUR"
+{
+  echo "session      : $S"
+  echo "started      : $(date)   clock: $(clock_state)"
+  echo "power        : $pm"
+  echo "vps repo     : $(git -C ~/ros2_ws/src/vps_uav_benchmarking rev-parse --short HEAD) ($(git -C ~/ros2_ws/src/vps_uav_benchmarking status --short | wc -l) uncommitted changes)"
+  echo "open_vins    : $(git -C ~/ros2_ws/src/open_vins rev-parse --short HEAD) ($(git -C ~/ros2_ws/src/open_vins status --short | wc -l) uncommitted)"
+  echo "config md5   : $(md5sum ~/ros2_ws/install/vps_uav_benchmarking/share/vps_uav_benchmarking/config/*.yaml | awk '{printf "%s:%s ", substr($2, match($2,/[^\/]*$/)), substr($1,1,8)}')"
+} > "$S/session.txt"
+
+fail() {   # stop whatever this run started, keep the logs, clear "current"
+  red "$1"; [ -n "$2" ] && tail -8 "$2"
+  stop_pid "$S/openvins.pid" 10; stop_pid "$S/camera.pid" 15; rm -f "$CUR"
+  red "Startup aborted - logs kept in $S"; exit 1
+}
+
+if ! lsusb | grep -qi '2bc5:'; then red "Orbbec camera not found on USB (lsusb) - check the cable."; rm -rf "$S"; rm -f "$CUR"; exit 1; fi
+echo "Starting camera..."
+start_bg "$S" camera ros2 launch vps_uav_benchmarking gemini335l_vio.launch.py
+ok=0
+for _ in $(seq 1 8); do
+  sleep 3
+  hz=$(topic_hz /camera/gyro_accel/sample 3)
+  if [ -n "$hz" ]; then ok=1; break; fi
+  alive "$S/camera.pid" || break
+done
+[ $ok = 1 ] || fail "Camera did not start streaming in 24 s - see $S/camera.log" "$S/camera.log"
+green "Camera streaming (IMU ${hz} Hz)"
+
+echo "Starting OpenVINS (output -> $S/openvins.log, core dumps -> /var/crash/cores)..."
+start_bg "$S" openvins ros2 launch vps_uav_benchmarking openvins_gemini335l.launch.py
+sleep 4
+alive "$S/openvins.pid" || fail "OpenVINS exited at start:" "$S/openvins.log"
+green "OpenVINS running."
+echo
+echo "Session: $S"
+echo "NEXT: lift the drone and slide it gently until  flight_status  says INITIALISED,"
+echo "      put it on the takeoff mark, then  flight_record  just before takeoff."
+echo "      Live OpenVINS output:  flight_logs     (Ctrl+C only stops the viewer)"

@@ -1,0 +1,5 @@
+[Unit]
+Description=Restore clock from last-known-good stamp (late backstop)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/clock-restore restore late
