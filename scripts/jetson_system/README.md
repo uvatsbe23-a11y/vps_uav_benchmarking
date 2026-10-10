@@ -16,3 +16,13 @@ Then: `systemctl daemon-reload; udevadm control --reload; systemctl enable clock
 The restored time is only the last saved time (behind by the downtime). For the
 real time run `scripts/flight/sync_jetson_clock.sh` on the ground PC; it also
 creates `/run/clock-synced`, which `flight_start` and `check_setup.sh` check.
+
+## Other tools
+
+| File | Installs to | Purpose |
+|---|---|---|
+| `wifi-mode` | `/usr/local/bin/` | `wifi-mode flight` (MOTHER_DRONE access point, 10.42.0.1) / `wifi-mode internet [SSID]` (joins TU by default) / `wifi-mode status`. Uses Wi-Fi passwords already saved in NetworkManager; none are stored in the script. |
+
+`scripts/tools/`: `pose_log.sh` (print OpenVINS pose once a second), `verify_axis_fix.sh`,
+`replay_axistest.sh`, `vps_replay_diag*.sh` (replay helpers from the Jul–Sep diagnosis).
+`docs/axis_test_steps.txt`: the Stage-1 handheld axis test procedure (Sep 6).

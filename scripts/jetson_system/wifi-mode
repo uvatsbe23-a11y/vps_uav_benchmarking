@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# wifi-mode — switch the Jetson's Wi-Fi radio between:
+#   flight    : broadcast the MOTHER_DRONE access point (for a ground station /
+#               laptop to connect directly to the drone). No internet.
+#   internet  : join an infrastructure Wi-Fi as a client (default: TU). Internet,
+#               apt, git, NTP.
+#   status    : show what the radio is doing right now.
+#
+# One radio can only do one of these at a time. Each mode also fixes the
+# autoconnect flags so a reboot comes back up in the SAME mode.
+#
+#   sudo wifi-mode flight
+#   sudo wifi-mode internet          # joins TU
+#   sudo wifi-mode internet ELC      # joins a different saved network
+#   wifi-mode status
+#
+# The USB/SSH link (l4tbr0, 192.168.55.x) is never touched.
+
+set -u
+
+WIFI_DEV="wlP1p1s0"
+AP_CONN="mother-drone"                 # the MOTHER_DRONE AP profile
+CLIENT_CONNS="TU ELC Arnav"           # known infrastructure profiles
+DEFAULT_CLIENT="TU"
+
+[ "$(id -u)" = 0 ] || exec sudo -- "$0" "$@"
+
+say()  { printf '  %s\n' "$*"; }
+have_conn() { nmcli -t -f NAME connection show 2>/dev/null | grep -qx "$1"; }
+
+current_wifi_conn() {
+  nmcli -t -f DEVICE,CONNECTION device 2>/dev/null | awk -F: -v d="$WIFI_DEV" '$1==d{print $2}'
+}
+
+wait_state() {  # $1 = "ap" | "online" ; up to ~25s
+  local want="$1" i
+  for i in $(seq 1 25); do
+    if [ "$want" = ap ]; then
+      ip -4 addr show "$WIFI_DEV" 2>/dev/null | grep -q 'inet 10\.42\.' && return 0
+    else
+      [ "$(nmcli -t networking connectivity 2>/dev/null)" = full ] && return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+mode_flight() {
+  echo "→ FLIGHT mode: bringing up the $AP_CONN access point"
+  have_conn "$AP_CONN" || { echo "  ERROR: no '$AP_CONN' connection profile. Aborting."; exit 1; }
+
+  for c in $CLIENT_CONNS; do
+    have_conn "$c" && nmcli connection modify "$c" connection.autoconnect no 2>/dev/null
+  done
+  nmcli connection modify "$AP_CONN" connection.autoconnect yes connection.autoconnect-priority 100 2>/dev/null
+
+  nmcli connection down "$AP_CONN" >/dev/null 2>&1
+  local cur; cur="$(current_wifi_conn)"
+  [ -n "$cur" ] && [ "$cur" != "$AP_CONN" ] && nmcli connection down "$cur" >/dev/null 2>&1
+  sleep 2
+
+  local i
+  for i in 1 2 3; do
+    nmcli connection up "$AP_CONN" >/dev/null 2>&1 && break
+    say "retry $i…"; sleep 3
+  done
+
+  if wait_state ap; then
+    say "AP up:  SSID $(nmcli -g 802-11-wireless.ssid connection show "$AP_CONN") on $WIFI_DEV ($(ip -4 -br addr show "$WIFI_DEV" | awk '{print $3}'))"
+    say "reboot will come back in FLIGHT mode."
+  else
+    echo "  ERROR: AP did not come up. 'wifi-mode status' for details, or 'journalctl -u NetworkManager -e'."
+    exit 1
+  fi
+}
+
+mode_internet() {
+  local target="${1:-$DEFAULT_CLIENT}"
+  echo "→ INTERNET mode: joining '$target'"
+  if ! have_conn "$target"; then
+    echo "  No saved profile '$target'. Create it once with:"
+    echo "      sudo nmcli device wifi connect '$target' password 'PASSWORD'"
+    echo "  then re-run: sudo wifi-mode internet '$target'"
+    exit 1
+  fi
+
+  nmcli connection modify "$AP_CONN" connection.autoconnect no 2>/dev/null
+  nmcli connection down "$AP_CONN" >/dev/null 2>&1
+  for c in $CLIENT_CONNS; do
+    [ "$c" = "$target" ] && continue
+    have_conn "$c" && nmcli connection modify "$c" connection.autoconnect no 2>/dev/null
+  done
+  nmcli connection modify "$target" connection.autoconnect yes connection.autoconnect-priority 10 2>/dev/null
+  sleep 1
+
+  local i
+  for i in 1 2 3; do
+    nmcli connection up "$target" >/dev/null 2>&1 && break
+    say "retry $i…"; sleep 3
+  done
+
+  if wait_state online; then
+    say "online: $(ip -4 -br addr show "$WIFI_DEV" | awk '{print $3}') via $(nmcli -g IP4.GATEWAY connection show "$target" 2>/dev/null)"
+    say "reboot will come back in INTERNET mode ('$target')."
+  else
+    echo "  Joined '$target' but no internet yet (connectivity: $(nmcli -t networking connectivity)). Check signal / password."
+    exit 1
+  fi
+}
+
+mode_status() {
+  local cur; cur="$(current_wifi_conn)"
+  echo "Wi-Fi device : $WIFI_DEV"
+  echo "Active conn   : ${cur:-<none>}"
+  echo "IPv4         : $(ip -4 -br addr show "$WIFI_DEV" 2>/dev/null | awk '{print $3}')"
+  echo "Connectivity : $(nmcli -t networking connectivity 2>/dev/null)"
+  if [ "$cur" = "$AP_CONN" ]; then
+    echo "Mode         : FLIGHT (broadcasting $(nmcli -g 802-11-wireless.ssid connection show "$AP_CONN"))"
+  elif [ -n "$cur" ]; then
+    echo "Mode         : INTERNET (client of $cur)"
+  else
+    echo "Mode         : neither — radio idle"
+  fi
+  echo "Autoconnect  :"
+  for c in "$AP_CONN" $CLIENT_CONNS; do
+    have_conn "$c" && printf '  %-14s %s (prio %s)\n' "$c" \
+      "$(nmcli -g connection.autoconnect connection show "$c")" \
+      "$(nmcli -g connection.autoconnect-priority connection show "$c")"
+  done
+}
+
+case "${1:-status}" in
+  flight)          mode_flight ;;
+  internet|inet)   shift; mode_internet "${1:-}" ;;
+  status|"")       mode_status ;;
+  *) echo "usage: wifi-mode {flight | internet [SSID] | status}"; exit 2 ;;
+esac
