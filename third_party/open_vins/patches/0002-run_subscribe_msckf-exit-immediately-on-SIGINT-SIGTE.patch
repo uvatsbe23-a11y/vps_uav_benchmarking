@@ -1,0 +1,62 @@
+From 577805b1f4df18d4c30657f46517e2234587996c Mon Sep 17 00:00:00 2001
+From: Utkarsh Vats <uvats_be23@gmail.com>
+Date: Sat, 10 Oct 2026 16:22:56 +0530
+Subject: [PATCH 2/2] run_subscribe_msckf: exit immediately on SIGINT/SIGTERM
+
+The shutdown path (spin returns -> visualize_final -> rclcpp::shutdown) races
+the detached image-processing threads: on vajra it segfaulted (-11), aborted
+(-6) or hung past ros2 launch's 5 s SIGINT->SIGTERM escalation. Install our
+own handlers (rclcpp signal handlers disabled) that write a note and _Exit(0).
+---
+ ov_msckf/src/run_subscribe_msckf.cpp | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/ov_msckf/src/run_subscribe_msckf.cpp b/ov_msckf/src/run_subscribe_msckf.cpp
+index b4676b6..ff6f1e9 100644
+--- a/ov_msckf/src/run_subscribe_msckf.cpp
++++ b/ov_msckf/src/run_subscribe_msckf.cpp
+@@ -19,8 +19,10 @@
+  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  */
+ 
++#include <csignal>
+ #include <cstdlib>
+ #include <memory>
++#include <unistd.h>
+ 
+ #include "core/VioManager.h"
+ #include "core/VioManagerOptions.h"
+@@ -36,6 +38,19 @@
+ 
+ using namespace ov_msckf;
+ 
++#if ROS_AVAILABLE == 2
++// Stop immediately on SIGINT/SIGTERM. The normal path (spin returns ->
++// visualize_final -> shutdown) races the detached image-processing threads in
++// ROS2Visualizer, which segfault (-11), abort (-6) or hang past launch's 5 s
++// SIGINT->SIGTERM escalation. Nothing needs saving at exit, so just leave.
++static void stop_now(int) {
++  static const char msg[] = "[ov_msckf] stop signal received - exiting immediately\n";
++  ssize_t r = write(STDERR_FILENO, msg, sizeof(msg) - 1);
++  (void)r;
++  std::_Exit(EXIT_SUCCESS);
++}
++#endif
++
+ std::shared_ptr<VioManager> sys;
+ #if ROS_AVAILABLE == 1
+ std::shared_ptr<ROS1Visualizer> viz;
+@@ -59,7 +74,9 @@ int main(int argc, char **argv) {
+   nh->param<std::string>("config_path", config_path, config_path);
+ #elif ROS_AVAILABLE == 2
+   // Launch our ros node
+-  rclcpp::init(argc, argv);
++  rclcpp::init(argc, argv, rclcpp::InitOptions(), rclcpp::SignalHandlerOptions::None);
++  std::signal(SIGINT, stop_now);
++  std::signal(SIGTERM, stop_now);
+   rclcpp::NodeOptions options;
+   options.allow_undeclared_parameters(true);
+   options.automatically_declare_parameters_from_overrides(true);
+-- 
+2.34.1
+
