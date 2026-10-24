@@ -21,6 +21,9 @@ imu0:
   gyroscope_random_walk: 0.00001110622
   rostopic: /camera/gyro_accel/sample
   time_offset: 0.0
+  # 500 Hz: the Orbbec driver's sampleRateFromString() has no "400hz" entry, so
+  # accel_rate/gyro_rate must be 200hz / 500hz / 1khz / ...  Keep this in sync with
+  # launch/gemini335l_vio.launch.py (accel_rate, gyro_rate) and scripts/check_setup.sh.
   update_rate: 500
   # three different modes supported:
   # "calibrated" (same as "kalibr"), "kalibr", "rpng"

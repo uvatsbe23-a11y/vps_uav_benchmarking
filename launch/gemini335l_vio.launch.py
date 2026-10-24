@@ -8,8 +8,12 @@ What this sets up and why:
   * IR dot projector OFF  -> the projected pattern is fixed to the camera, so under
                              motion it slides across the scene and corrupts stereo
                              feature tracking. Turn it off for VIO.
-  * synchronised accel+gyro on ONE topic (/camera/gyro_accel/sample) at 400 Hz ->
-                             matches config/kalibr_imu_chain.yaml (update_rate: 400)
+  * synchronised accel+gyro on ONE topic (/camera/gyro_accel/sample) at 500 Hz ->
+                             matches config/kalibr_imu_chain.yaml (update_rate: 500).
+                             NOTE: the driver's sampleRateFromString() only accepts
+                             a fixed set of strings (...100hz, 200hz, 500hz, 1khz...);
+                             "400hz" is NOT one of them and silently falls back to
+                             100 Hz. Keep this at a value the driver recognises.
   * colour + depth off    -> not used by OpenVINS; keeps CPU/USB headroom.
                              (set enable_depth:=true if you also want depth in the bag)
   * header stamps in host/ROS time -> avoids a device-vs-host clock offset
@@ -48,8 +52,8 @@ def generate_launch_description():
         "gyro_range": "1000dps",
         "enable_color": "false",
         "enable_depth": "false",
-        "time_domain": "global",                 # publish ROS/host time on headers
-        "enable_sync_host_time": "true"
+        "time_domain": "global",                 # device clock synced to host -> host/ROS time on headers
+        "enable_sync_host_time": "true",         # (verified 10 Oct: camera stamps matched the Jetson clock)
     }
 
     return LaunchDescription([
