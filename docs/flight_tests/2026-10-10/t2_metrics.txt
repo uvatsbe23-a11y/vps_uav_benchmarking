@@ -1,0 +1,33 @@
+=== t2: OpenVINS vs flight-controller reference ===
+Reference: EKF3 (XKF1) position. GPS 14-17 sats, HAcc 1.8-3.0 m, VAcc 3.1-5.3 m -> errors below ~2-3 m are not resolvable.
+Time sync: gyro correlation 0.993; bag clock = GPS time -1.235 s
+Camera mounting (from gyros): camera IMU z-axis 6.1 deg from body-down -> camera faces DOWN
+Timeline (from arming): takeoff    3.9s, landing  212.8s, disarm  212.8s
+OpenVINS output covers 0.0s .. 77.9s after arming (flight ends 212.8s); STOPPED 135s before disarm  -> metrics below use only the covered part
+Flight: true path 428 m whole flight (135 m while OpenVINS ran), max speed 9.9 m/s, mean airborne speed 2.0 m/s, height ~9.1 m
+
+#1 ATE (absolute trajectory error)
+   anchored at arming (live-use, honest) : RMSE 7.8 m, max 13.9 m
+   best-fit 4-DoF over flight (optimistic): RMSE 1.5 m, max 2.4 m
+   frame-link yaw 134.4 deg vs best-fit yaw 140.6 deg
+#2 Drift
+   error at LAST OpenVINS output (not a closed loop) 12.7 m  /  true path 135 m  =  9.4 %   (old method, VIO's own path 139 m: 9.1 %)
+#4 Scale
+   whole flight: VIO path / true path = 1.03
+   early flight (takeoff -> 36s): sim3 scale 0.97, path ratio 1.02
+#5 Per-axis error (anchored)          RMSE     max     at end
+   East                                 2.8     5.4     -5.1 m
+   North                                7.1    12.6    -11.5 m
+   Up (Z)                               1.4     2.5     -2.0 m
+#9 Divergence (anchored error first exceeds threshold, after takeoff)
+   >  2 m :  11.8 s after takeoff, after    24 m flown
+   >  5 m :  36.1 s after takeoff, after    59 m flown
+   > 10 m :  51.9 s after takeoff, after   101 m flown
+#12 Vibration (RMS of >5 Hz accel, m/s^2; ArduPilot guide: <30 good, >60 bad)
+   FC IMU   (VIBE)  : mean X/Y/Z 1.9/2.8/6.0, max 41.0, clip count 0
+   camera IMU       : mean X/Y/Z 3.1/5.8/10.2, max 16.7   (on ground before arming: 0.05)
+   camera accel |a| max 57.4 m/s^2 (5.9 g)
+Also noted
+   heading drift vs FC: max 7.2 deg, end -5.1 deg; tilt agreement max 2.4 deg
+   OpenVINS output rate in air 15.0 Hz (camera 30 Hz)
+   error inside OpenVINS's own 3-sigma: 5% of the flight (consistent filter ~99%)

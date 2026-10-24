@@ -1,0 +1,58 @@
+60 windows of 5 s (45 healthy: accumulated error < 20 m; 15 after OpenVINS was already lost)
+  t1:  15 windows, healthy   4, median local drift healthy 1.06 m/s, lost 6.75 m/s
+  t2:  14 windows, healthy  14, median local drift healthy 0.21 m/s, lost nan m/s
+  t3:  17 windows, healthy  13, median local drift healthy 0.46 m/s, lost 3.74 m/s
+  t4:  14 windows, healthy  14, median local drift healthy 0.82 m/s, lost nan m/s
+
+Rank correlation of local drift rate with each condition (Spearman rho; |rho|>0.3 notable)
+  condition                     healthy       p      all
+  speed (m/s)                     +0.27   0.073    +0.34
+  max speed (m/s)                 +0.27   0.068    +0.40
+  acceleration (m/s²)             -0.04   0.818    +0.10
+  climb/descent (m/s)             -0.18   0.235    -0.01
+  height (m)                      -0.31   0.036    -0.55
+  yaw rate (°/s)                  +0.16   0.298    +0.13
+  camera rotation (rad/s)         +0.12   0.415    -0.07
+  camera vibration (m/s²)         +0.10   0.493    -0.10
+  image brightness                +0.23   0.129    +0.40
+  image sharpness                 -0.20   0.199    +0.03
+  texture (corners/img)           -0.24   0.107    -0.03
+  image motion (px/frame)         +0.21   0.168    +0.22
+  feature track ratio             -0.09   0.543    -0.29
+  GPS accuracy (m)                +0.31   0.038    +0.06
+
+Local drift rate (m/s, median) by condition bins - healthy windows
+  speed (m/s)                | 0-0.5: 0.26 (n=13) | 0.5-2: 0.28 (n=11) | 2-4: 0.47 (n=18) | 4-6: n=1 | 6-11: n=2
+  height (m)                 | 0-6: 1.06 (n=4) | 6-12: 0.44 (n=41)
+  image motion (px/frame)    | 0-1: n=1 | 1-3: 0.33 (n=16) | 3-6: 0.46 (n=24) | 6-20: n=2 | 20-100: n=2
+  texture (corners/img)      | 0-300: 0.82 (n=22) | 300-600: 0.31 (n=11) | 600-900: 0.26 (n=3) | 900-3000: 0.45 (n=5)
+  camera vibration (m/s²)    | 0-8: n=0 | 8-12: 0.34 (n=20) | 12-16: 0.46 (n=22) | 16-40: 1.57 (n=3)
+  yaw rate (°/s)             | 0-2: 0.32 (n=21) | 2-5: 0.76 (n=17) | 5-10: 0.15 (n=4) | 10-90: 0.47 (n=3)
+  acceleration (m/s²)        | 0-0.3: n=0 | 0.3-0.7: 0.45 (n=27) | 0.7-1.5: 0.29 (n=16) | 1.5-10: n=2
+  image sharpness            | 0-80: 0.82 (n=21) | 80-120: 0.32 (n=16) | 120-160: n=2 | 160-1000: 0.49 (n=6)
+
+WORST 10 healthy windows
+  flight   t(s)  drift  speed  hgt  yaw°/s  vibe  corners  flow  sharp  track  gpsHacc
+  t1        17   3.73    9.3  4.7    2.5   21.2    3750   44.9    302   0.79    2.4
+  t3        62   2.18    2.5  9.1   17.4   10.0     120    4.6     77   1.00    3.2
+  t3        57   1.87    0.2  9.1    4.1   12.0     178    1.5     73   1.00    3.3
+  t4        67   1.67    0.2  6.9    0.9   10.7      28    2.2     47   1.00    4.2
+  t3        52   1.64    1.1  9.1    1.9   12.2     179    2.6     73   1.00    3.4
+  t1        12   1.57    9.0  4.7    2.0   23.7    1749   37.3    185   0.81    2.5
+  t3        47   1.21    2.8  9.2    3.7   13.9     144    5.0     67   1.00    4.1
+  t4        52   1.17    0.9  8.9    2.2   11.1       8    3.6     40   1.00    4.0
+  t4        32   1.07    2.7  9.1    3.9    9.0      37    3.1     62   1.00    3.9
+  t4        37   1.05    2.8  9.0    2.0    9.5       5    3.5     36   0.96    3.8
+
+BEST 10 healthy windows
+  flight   t(s)  drift  speed  hgt  yaw°/s  vibe  corners  flow  sharp  track  gpsHacc
+  t3        22   0.02    1.9  9.2    6.9   13.9     361    4.6     92   1.00    4.8
+  t2        17   0.04    0.1  9.1    1.1   10.2     159    1.0     69   1.00    1.9
+  t2        22   0.05    1.3  9.1    8.4   12.7     137    3.0     69   1.00    2.0
+  t2         7   0.08    3.1  9.2    1.5   13.8      89    6.8     53   0.99    1.8
+  t2         2   0.12    0.2  8.0    1.2   11.1     186    1.4     64   1.00    1.8
+  t3         2   0.12    0.4  8.1    1.5    9.6      74    2.8     49   1.00    2.3
+  t2        12   0.12    0.7  9.2    1.1   10.0     175    1.5     70   1.00    1.8
+  t3        32   0.12    1.6  9.1    1.4   13.3     527    4.2     99   1.00    4.4
+  t2        27   0.13    2.7  9.2    4.3   14.6     514    4.6     95   1.00    2.0
+  t2        67   0.16    0.2  9.1    1.8   11.2    6968    1.4    421   1.00    2.5

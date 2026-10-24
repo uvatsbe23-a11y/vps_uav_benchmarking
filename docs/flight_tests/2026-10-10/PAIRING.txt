@@ -1,0 +1,22 @@
+FLIGHT TEST 2026-10-10 — BAG <-> TELEMETRY PAIRING
+Paired by the actual times inside each file (telemetry = GPS time from the
+.bin log; bag = Jetson clock). Each telemetry log fits inside its bag.
+
+Test  Bag folder (Jetson recording)   Bag time (IST)        Telemetry log                    Log time (IST)       Disarm
+----  ------------------------------  --------------------  -------------------------------  -------------------  --------
+ #1   stage3_flight1_0928             09:28:15 - 09:30:52   log_25_2026-10-10-09-35-02.bin   09:29:01 - 09:30:39  09:30:24
+ #2   stage3_flight1_0958             09:58:52 - 10:04:30   log_26_2026-10-10-10-07-28.bin   10:00:15 - 10:04:02  10:03:47
+ #3   stage3_flight1_1021             10:21:31 - 10:26:02   log_27_2026-10-10-10-26-52.bin   10:22:24 - 10:25:41  10:25:26
+ #4   stage3_flight1_0532 (*)         10:42:18 - 10:45:12   log_28_2026-10-10-10-46-24.bin   10:42:44 - 10:45:07  10:44:52
+
+(*) Test #4 bag was recorded with the Jetson clock at 1970. Real times come
+    from test4_clock_offset.txt: real_time = bag_timestamp + 1791608972.64 s.
+    The telemetry log falling neatly inside that window confirms the offset.
+
+Notes
+ - The time in each .bin file NAME is when the log was closed/saved, not
+   when the flight started — use the times above.
+ - Bag folder names all say "flight1" (name was not changed between
+   flights); the 4-digit suffix is the start time.
+ - Damaged pre-flight attempt stage3_flight1_1037 (Jetson lost power) was
+   NOT copied; it has no matching flight.

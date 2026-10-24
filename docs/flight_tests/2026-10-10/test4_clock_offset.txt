@@ -1,0 +1,6 @@
+Test #4 bag: vajra:~/stage3_flight1_0532  (recorded with Jetson clock at 1970)
+Measured 2026-10-10 against this PC (NTP-synced), 3 samples, ~0.3 s SSH round trip:
+  real_time = bag_timestamp + 1791608972.64 s   (+/- ~0.2 s)
+  bag start 165.634 -> Sat Oct 10 10:42:18 AM IST 2026
+  bag end   340.234 -> Sat Oct 10 10:45:12 AM IST 2026
+Valid only because the Jetson clock was not changed between recording and measurement.
