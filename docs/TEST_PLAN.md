@@ -2,7 +2,14 @@
 
 **System under test:** OpenVINS (stereo-inertial MSCKF) on Jetson + Orbbec Gemini 335L
 **What we are validating:** the `T_cam_imu` correction in `config/kalibr_imucam_chain.yaml`
-(see `KNOWN_ISSUES.md` #2 — the ~107 m Z-axis divergence).
+(see `KNOWN_ISSUES.md` #2, the ~107 m Z-axis divergence), then flight performance.
+
+> **Status (24 Oct 2026):** Stage 3 was flown on **10 Oct 2026** (4 flights). The `T_cam_imu` fix
+> is confirmed (no axis error in flight), but position drifts ~10 m after 50–100 m and OpenVINS
+> stopped mid-flight in 3 of 4 flights. Results: [`flight_tests/2026-10-10/`](flight_tests/2026-10-10/).
+> **The next flights follow the "NEXT FLIGHT DAY CHECKLIST" in
+> [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md)** (controlled ladder: hover → slow straight
+> out-and-back → faster → other heights). Stages 0–2 below still apply to bench and handheld checks.
 **Who runs it:** lab juniors. **Who signs off each gate:** project owner (currently remote).
 
 Work through Stages 0 → 3 in order. Each stage is a **gate** — do not start the next stage
@@ -14,22 +21,17 @@ until the current one passes and (for Stage 2 → 3) the owner has seen the numb
 
 OpenVINS fuses the two IR cameras with the camera IMU to estimate position. In a forward-flight
 test the altitude estimate diverged catastrophically: ~107 m endpoint error over 90 s, Z swinging
-+4 m to −76 m. Root cause: a 90° frame mismatch between the camera optical frame (Z-forward) and
-the IMU body frame (X-forward). A corrected rotation was written into `T_cam_imu` for `cam0` and
-`cam1`:
++4 m to −76 m. This was first blamed on a 90° camera/IMU frame mismatch, and a hand-built 90°
+rotation was written into `T_cam_imu`. **That "fix" was itself wrong** (replay diagnosis
+2026-09-06): OpenVINS uses the camera's *built-in* IMU, which is near-aligned with the IR cameras,
+so `T_cam_imu` must be **near-identity** (OpenVINS's stock `orbbec_335l_stereo_ir` value, now in
+`config/`). Replay drift on `stage1_axes`: 43.7 % with the 90° matrix, 1.15 % with near-identity.
+See `KNOWN_ISSUES.md` #2. Flights on 10 Oct 2026 confirmed it (no axis error).
 
-```
-[ 0, -1,  0 ]
-[ 0,  0, -1 ]
-[ 1,  0,  0 ]
-```
+The original bag recorded only OpenVINS *output*, so it couldn't be replayed. Hence: **every bag
+records raw topics** (`scripts/record_bag.sh` / `flight_record` enforce this).
 
-It has **never been validated**, because the original bag recorded only OpenVINS *output*, not
-raw sensor input, so it can't be replayed. Hence: a fresh staged test, and **every bag records
-raw topics** (`scripts/record_bag.sh` enforces this).
-
-Because the bug depends on physical mounting, and the camera was off the airframe in storage,
-the mounting orientation is unverified until **Stage 1**.
+Mounting (measured from the 10 Oct flights): camera facing **down**, tilted 6–8°.
 
 ---
 
@@ -50,14 +52,16 @@ the mounting orientation is unverified until **Stage 1**.
   ```
 
 If any external package is missing, install it **before** Stage 0 — that's setup, not part of
-the test. `~/vps_deploy.sh` on the flight Jetson does a from-scratch install (JetPack 6 + ROS 2
-Jazzy + OpenVINS deps). The flight Jetson is reachable at `vajra@192.168.55.1`.
+the test. The flight Jetson (`vajra`, JetPack 6 + ROS 2 **Humble**) is reachable at
+`vajra@192.168.55.1` (USB) or `vajra@10.42.0.1` (`MOTHER_DRONE` Wi-Fi, `wifi-mode flight`).
+OpenVINS must be built with the patches in `third_party/open_vins/`.
 
-> **Two analyzers, use both:**
-> - `scripts/compute_drift.py <bag> [edge_window_sec]` — the canonical headline-drift tool.
->   Reads `/ov_msckf/poseimu`; this is what produced the earlier bench numbers (~1.2–1.3 %),
->   so it is the apples-to-apples comparison. Use `edge_window_sec` (e.g. `2`) on the
->   closed-loop runs so start/end are averaged over a couple of seconds.
+> **Analyzers:**
+> - **Flights:** `scripts/analysis/` compares the bag with the flight controller's `.bin` log
+>   (time-aligned; ATE, true drift, divergence distance, …). Use this for Stage 3.
+> - `scripts/compute_drift.py <bag> [edge_window_sec]`: quick closed-loop endpoint drift from
+>   `/ov_msckf/poseimu` (use `edge_window_sec` e.g. `2`). It divides by OpenVINS's *own* path
+>   length, so it **understates drift when OpenVINS diverges** (`KNOWN_ISSUES.md` #12).
 > - `scripts/flight_analysis.py <bag> --path-length <m> --plot --csv summary.csv` — batch
 >   companion: per-run CSV rows, trajectory PNGs, and the Z-axis excursion alarm. Defaults to
 >   `/ov_msckf/odomimu` (same position data); pass `--odom-topic /ov_msckf/poseimu` to match
@@ -66,11 +70,9 @@ Jazzy + OpenVINS deps). The flight Jetson is reachable at `vajra@192.168.55.1`.
 > `record_bag.sh` captures `/ov_msckf/odomimu`, `/ov_msckf/poseimu` and `/ov_msckf/pathimu`,
 > so either tool works on every bag.
 
-> **Not in this repo:** the earlier `vps_bridge` IR pre-processor (`ir_preprocessor.py`:
-> median blur + histogram equalisation on the IR images before OpenVINS) and the
-> OpenVINS→MAVROS bridge / pose sanity-filter are **not** part of this package. The test runs
-> OpenVINS directly on the raw driver output. If those get pushed later, revisit whether the
-> pipeline under test should include them.
+> **`vps_bridge`** (IR pre-processor + OpenVINS→MAVROS bridge with pose sanity filter) is now in
+> `ros2_packages/vps_bridge/` but is **not** part of the pipeline under test: OpenVINS runs directly on
+> the raw driver output and is only recorded.
 
 ### 1.2 Physical
 
@@ -95,14 +97,19 @@ or the launch **file name** itself), fix it in `launch/gemini335l_vio.launch.py`
 
 ## 2. Stage 0 — Bring-up
 
-### 2.1 Lock the Jetson clocks (every boot — KNOWN_ISSUES #3)
+### 2.1 Power, clocks and time (every boot: KNOWN_ISSUES #3, #9)
 
 ```bash
-sudo nvpmodel -m 0
+sudo nvpmodel -m 2      # MAXN_SUPER. NOT -m 0: that is the throttled 15 W mode
 sudo jetson_clocks
 ```
+and on the ground PC: `scripts/flight/sync_jetson_clock.sh` (the Jetson clock is wrong after power-on).
 
-### 2.2 Start camera + VIO (two terminals, both sourced)
+### 2.2 Start camera + VIO
+
+Easiest: `flight_start` (does 2.1 except the clock sync, starts both, logs to `~/flights/<date>/…`;
+check with `flight_status`). Manual alternative, two terminals, both sourced and with
+`export ROS_LOCALHOST_ONLY=1`:
 
 ```bash
 # terminal A
@@ -121,8 +128,9 @@ ros2 run vps_uav_benchmarking check_setup.sh
 ```
 
 It verifies: the five required topics exist; left/right IR ≥ 15 Hz; IMU
-(`/camera/gyro_accel/sample`) ≥ 300 Hz (target 400); `/ov_msckf/odomimu` publishing; left IR
-resolution 848×480; camera↔system clock offset < 0.5 s.
+(`/camera/gyro_accel/sample`) ≥ 300 Hz (target 500; ~493 measured); `/ov_msckf/odomimu`
+publishing (only after OpenVINS initialises); left IR resolution 848×480; camera↔system clock
+offset < 0.5 s; system clock synced this boot.
 
 **Gate:** exit code 0 (no warnings). Fix any warning before Stage 1. Save the console output.
 
@@ -218,8 +226,8 @@ python3 $(ros2 pkg prefix vps_uav_benchmarking)/lib/vps_uav_benchmarking/generat
 
 ### 4.4 Gate
 
-- **drift consistently in the low single-digit %** across all 5+ runs (for reference, bench
-  testing of this fix landed around **1.2–1.3 %**)
+- **drift consistently in the low single-digit %** across all 5+ runs (for reference, the
+  `stage1_axes` replay with the fix gave **1.15 %**; the older 1.2–1.3 % bench numbers are suspect)
 - **`max_abs_z_dev_m` stays small** on every run — no Z blow-up
 - results are repeatable, not one good run among bad ones
 
@@ -234,35 +242,35 @@ go-ahead. Fail → re-check Stage 1, send the numbers, do not proceed.
 
 ### 5.1 Setup
 
-Camera mounted as Stage 1, vibration isolation in place if the airframe has it, Jetson clocks
-locked. Tape the takeoff point. Plan a **closed polygon** (e.g. rectangle ~10–20 m/side at safe
-altitude) ending with a landing back on the mark. Normal flight-safety procedure.
+Camera mounted as Stage 1, vibration isolation in place if the airframe has it. Jetson clock
+synced from the ground PC (`sync_jetson_clock.sh`). Tape the takeoff point; textured ground; flight
+profile per the handoff's **NEXT FLIGHT DAY CHECKLIST** (one variable at a time, speed ÷ height
+≤ ~0.35 s⁻¹ to start). Normal flight-safety procedure; OpenVINS is only recorded, the drone flies on GPS.
 
-### 5.2 Flights — at least 5
+### 5.2 Flights
 
 ```bash
-ros2 run vps_uav_benchmarking record_bag.sh stage3_flight1     # 2, 3, ...
+flight_start        # then lift/slide the drone until flight_status says INITIALISED
+flight_record       # just before take-off
+# fly; sharp yaw or short hover right after take-off (time-sync marker); land on the mark
+flight_stop         # after landing (from any SSH session)
 ```
 
-Start recording before takeoff; fly the polygon; land as close to the mark as possible (measure
-any offset and note it); stop recording after touchdown.
+Measure the landing offset from the mark; photograph the ground; download the flight
+controller's `.bin` log for each flight.
 
 ### 5.3 Analyse
 
-```bash
-FA=$(ros2 pkg prefix vps_uav_benchmarking)/lib/vps_uav_benchmarking/flight_analysis.py
-for d in stage3_flight*/ ; do
-    python3 "$FA" "$d" --path-length <PLANNED_PATH_LEN> --plot --csv stage3_summary.csv
-done
-python3 $(ros2 pkg prefix vps_uav_benchmarking)/lib/vps_uav_benchmarking/generate_briefing_graphs.py \
-    stage3_summary.csv
-```
+Copy the session folders (`~/flights/<date>/`) and the `.bin` logs to the ground PC, then follow
+[`scripts/analysis/README.md`](../scripts/analysis/README.md) (`extract_bag.py`, `extract_bin.py`,
+`analyze_flight.py`, optionally `image_metrics.py` + `diagnose_conditions.py`).
 
-### 5.4 What we expect
+### 5.4 What we saw (10 Oct 2026) and expect next
 
-Endpoint drift in **metres, not ~107 m**; Z **bounded** (no +4 → −76 m swing). Somewhat worse
-than handheld (vibration) but same ballpark. Whatever the number is, it is the result — record
-it with the bags.
+10 Oct: no axis error, but ~10 m error after 50–100 m, 95 % drift on the fast/low flight, and
+OpenVINS stopping mid-flight in 3 of 4 flights ([`flight_tests/2026-10-10/`](flight_tests/2026-10-10/)).
+Next: within the speed/height envelope and over textured ground, the error should grow clearly
+slower; record whatever it is, with the bags.
 
 ---
 
@@ -284,13 +292,15 @@ Fill in `docs/REPORT_TEMPLATE.md` and attach:
 | Symptom | Likely cause | Action |
 |---|---|---|
 | `check_setup.sh`: IMU topic missing / low rate | `enable_sync_output_accel_gyro` not set, or rate arg wrong | Fix args in `gemini335l_vio.launch.py` (`--show-args` to get real names) |
-| `check_setup.sh`: clock offset > 0.5 s | Driver publishing device time | Set `time_domain:=system` (or the equivalent for your driver) |
+| `check_setup.sh`: clock offset > 0.5 s | Driver publishing device time | Launch uses `time_domain: global` + `enable_sync_host_time: true` (as flown); check they are set |
+| `check_setup.sh` / `flight_start`: system clock not synced, or year 1970 | Jetson RTC has no battery | Run `scripts/flight/sync_jetson_clock.sh` on the ground PC **before** starting |
 | `check_setup.sh`: resolution not 848×480 | IR stream profile mismatch | Set the IR width/height/profile args to match `kalibr_imucam_chain.yaml` |
 | OpenVINS never initialises | Not enough motion/texture at start, or bad `config_path` | Slow figure-8 to start; check the launch resolved `estimator_config.yaml` |
 | Static test: estimate walks metres, Z ramps | `T_cam_imu` wrong for this mounting | Re-check mount orientation; verify the rotation block in `kalibr_imucam_chain.yaml`; report |
 | Hand-move forward → estimate goes backward/sideways | Axis swap/flip — the original bug class | **Stop. Message the owner.** |
 | X/Y fine, Z diverges under motion | Same 90° frame bug, partially corrected | Stop; keep the bag; report |
-| Frame drops / latency warnings | Jetson clocks not locked | `sudo nvpmodel -m 0 && sudo jetson_clocks` |
+| Frame drops / latency warnings / OpenVINS diverges live but not on replay | Throttled power mode | `sudo nvpmodel -m 2 && sudo jetson_clocks` (not `-m 0`) |
+| `flight_status`: OpenVINS "NO OUTPUT NOW (stalled?)" or "CRASHED" | Open issue (`KNOWN_ISSUES.md` #7) | Keep recording; note the time; check `openvins.log` and `/var/crash/cores/` after the flight |
 | Feature tracking lost mid-run | Blank wall, motion blur, IR projector on | Keep texture in view, slow down, confirm `enable_laser:=false` |
 | `flight_analysis.py`: "Topic ... not in bag" | Wrong `--odom-topic`, or bag recorded without it | `ros2 bag info <bag>`; use `record_bag.sh` next time |
 | Single catastrophic pose jump on fast motion | Known cuVSLAM tracking spike (KNOWN_ISSUES #1) | Only affects cuVSLAM runs, not this OpenVINS test |
@@ -301,8 +311,8 @@ Fill in `docs/REPORT_TEMPLATE.md` and attach:
 
 - **VIO / VPS** — estimating position from cameras + IMU (here: OpenVINS).
 - **MSCKF** — the filter OpenVINS runs.
-- **`T_cam_imu`** — fixed transform: camera pose relative to the IMU. Its rotation being 90° off
-  was the bug. In `config/kalibr_imucam_chain.yaml`.
+- **`T_cam_imu`**: fixed transform between the camera and the IMU. A hand-built 90° rotation here
+  was the bug; for the Orbbec built-in IMU it is near-identity. In `config/kalibr_imucam_chain.yaml`.
 - **`timeshift_cam_imu`** — small calibrated camera↔IMU time offset (already in the config; not
   the same as gross clock drift, which `check_setup.sh` checks for).
 - **Drift** — endpoint error as a percentage of distance travelled.

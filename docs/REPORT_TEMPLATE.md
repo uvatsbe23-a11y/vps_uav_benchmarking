@@ -13,11 +13,12 @@
 
 | Check | Result | Notes |
 |---|---|---|
-| Jetson clocks locked (`nvpmodel -m 0`, `jetson_clocks`) | ☐ |  |
+| Power mode MAXN_SUPER (`nvpmodel -m 2`, **not** `-m 0`) + `jetson_clocks` | ☐ |  |
+| Jetson clock synced from ground PC (`sync_jetson_clock.sh`) | ☐ |  |
 | `check_setup.sh` exit code | 0 / ___ |  |
 | left IR rate | ___ Hz |  |
 | right IR rate | ___ Hz |  |
-| IMU `/camera/gyro_accel/sample` rate | ___ Hz | target ~400 |
+| IMU `/camera/gyro_accel/sample` rate | ___ Hz | target 500 (~493 measured) |
 | `/ov_msckf/odomimu` publishing | ☐ |  |
 | left IR resolution | ___ × ___ | expect 848×480 |
 | camera↔system clock offset | ___ s | expect < 0.5 |
@@ -79,20 +80,21 @@ Attach: `stage2_summary.csv`, `drift_summary.png`, per-run `*_trajectory.png`
 ## Stage 3 — Flight test  *(only after owner approval)*
 
 **Approved by / date:**
-**Planned path length:** ___ m
+**Reference:** flight-controller EKF (GPS) / RTK   **Analysis:** `scripts/analysis/` (see its README)
+Example of a filled-in analysis: [`flight_tests/2026-10-10/`](flight_tests/2026-10-10/).
 
-| Flight | duration (s) | endpoint err (m) | err z (m) | max \|z−z0\| (m) | drift % | landing offset (m) |
-|---|---|---|---|---|---|---|
-| stage3_flight1 |  |  |  |  |  |  |
-| stage3_flight2 |  |  |  |  |  |  |
-| stage3_flight3 |  |  |  |  |  |  |
-| stage3_flight4 |  |  |  |  |  |  |
-| stage3_flight5 |  |  |  |  |  |  |
+| Flight (session folder) | `.bin` log | profile (height, max speed, shape) | ground / light | OpenVINS ran (s of s) | error > 10 m after (m flown) | ATE anchored RMSE (m) | true drift % | height RMSE (m) | landing offset (m) |
+|---|---|---|---|---|---|---|---|---|---|
+| flight01 |  |  |  |  |  |  |  |  |  |
+| flight02 |  |  |  |  |  |  |  |  |  |
+| flight03 |  |  |  |  |  |  |  |  |  |
+| flight04 |  |  |  |  |  |  |  |  |  |
+| flight05 |  |  |  |  |  |  |  |  |  |
 
-**Median drift:** ___ %   **Z bounded (no +4→−76 m type swing)?** ☐
-**Verdict vs original 107 m / −76 m failure:**
+**OpenVINS stopped / crashed in any flight?** (time, `flight_status` message, core dump?)
+**Z bounded?** ☐   **Verdict vs previous flights:**
 
-Attach: `stage3_summary.csv`, `drift_summary.png`, per-flight `*_trajectory.png`
+Attach: per-flight `tN_metrics.txt` + `tN_report.png`; ground photos; `session.txt` of each flight
 
 ---
 
