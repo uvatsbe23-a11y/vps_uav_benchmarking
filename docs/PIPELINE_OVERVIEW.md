@@ -195,7 +195,7 @@ the flight analysis pipeline (`scripts/analysis/`); Jetson clock restore and cra
 
 ## 7. What still needs work: read before starting anything
 
-The ordered plan with checklists is in [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md). In short:
+The phased plan is in [`ROADMAP.md`](ROADMAP.md); the immediate checklist in [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md). In short:
 
 1. **Position drift in flight** (`KNOWN_ISSUES.md` #6): image motion too large when fast and low, and
    low-texture ground. Try on the recorded bags first: process every frame (`track_frequency` 21 → ≥ 30,
@@ -247,7 +247,8 @@ cd ~/ros2_ws && colcon build --symlink-install && source install/setup.bash
 
 ## 9. Suggested order of work
 
-Superseded by the ordered checklist in [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md) ("NEXT STEPS"
-and "NEXT FLIGHT DAY CHECKLIST"). Done so far: `vps_bridge` wired to OpenVINS (now in the repo),
+See [`ROADMAP.md`](ROADMAP.md) for the phased plan (bench → offline fixes → hardware/calibration →
+flight ladder → flight-controller link → GPS-denied flight → map-based positioning), and
+[`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md) for the immediate checklist. Done so far: `vps_bridge` wired to OpenVINS (now in the repo),
 `compute_drift.py` ported, raw-topic recording, `T_cam_imu` corrected (2026-09-06) and confirmed in
 flight (2026-10-10), field routine and clock fixes (2026-10-10), all code on GitHub (2026-10-24).

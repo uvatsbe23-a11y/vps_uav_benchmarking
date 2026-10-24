@@ -9,7 +9,8 @@ First dynamic flight tests flown on **10 Oct 2026** (4 automatic GPS missions, c
 OpenVINS holds attitude and early scale, but its position drifts ~10 m after 50–100 m, and it
 stopped mid-flight in 3 of 4 flights. **Start here:**
 
-- [`docs/HANDOFF_2026-10-10.md`](docs/HANDOFF_2026-10-10.md): conclusions, what changed, and **what to do next** (incl. the next flight day checklist)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md): **the plan**, from bench readiness to GPS-denied flight (phases with exit criteria)
+- [`docs/HANDOFF_2026-10-10.md`](docs/HANDOFF_2026-10-10.md): conclusions, what changed, and the immediate next steps (incl. the next flight day checklist)
 - [`docs/flight_tests/2026-10-10/`](docs/flight_tests/2026-10-10/): detailed flight analysis with figures
 - [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) · [`docs/PIPELINE_OVERVIEW.md`](docs/PIPELINE_OVERVIEW.md) · [`docs/TEST_PLAN.md`](docs/TEST_PLAN.md)
 
@@ -92,4 +93,4 @@ ros2 run vps_uav_benchmarking record_bag.sh <name>               # raw topics, a
 | `scripts/legacy_jetson_home/` | old unreviewed scripts, archived |
 | `third_party/open_vins/` | OpenVINS local patches + extra configs |
 | `ros2_packages/vps_bridge/` | OpenVINS → MAVROS bridge with pose sanity filter (not yet used in tests) |
-| `docs/` | handoff, pipeline overview, known issues, test plan, report template, flight-test results |
+| `docs/` | roadmap, handoff, pipeline overview, known issues, test plan, report template, flight-test results |
