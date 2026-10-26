@@ -6,7 +6,7 @@ S=$(readlink -f "$CUR")
 alive "$S/recorder.pid" && { yel "Already recording in $S/bag"; exit 0; }
 [ -d "$S/bag" ] && { red "$S already has a bag - run flight_stop, then flight_start for the next flight."; exit 1; }
 alive "$S/openvins.pid" || { red "OpenVINS is not running."; exit 1; }
-if [ -z "$(topic_hz /ov_msckf/poseimu 3)" ]; then
+if [ -z "$(topic_hz /ov_msckf/poseimu 6)" ]; then   # 6 s: ros2 CLI needs ~2-3 s to start
   yel "OpenVINS is NOT initialised yet (no live estimate for this flight; raw data is still recorded)."
   read -r -p "Record anyway? [y/N] " a; [ "$a" = y ] || exit 1
 fi

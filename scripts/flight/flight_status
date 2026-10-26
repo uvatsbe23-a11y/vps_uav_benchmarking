@@ -13,7 +13,7 @@ show() {
     ls -t /var/crash/cores/core.run_subscribe* 2>/dev/null | head -1 | sed 's/^/  core dump: /'
   fi
   if alive "$S/openvins.pid"; then
-    hz=$(topic_hz /ov_msckf/poseimu 3)
+    hz=$(topic_hz /ov_msckf/poseimu 6)   # ros2 CLI needs ~2-3 s just to start on the Jetson
     if [ -n "$hz" ]; then
       p=$(timeout 3 ros2 topic echo --once --field pose.pose.position /ov_msckf/poseimu 2>/dev/null | awk '/^x:/{x=$2}/^y:/{y=$2}/^z:/{z=$2}END{printf "x %.2f  y %.2f  z %.2f m", x, y, z}')
       green "  OpenVINS: INITIALISED, ${hz} Hz   $p"
