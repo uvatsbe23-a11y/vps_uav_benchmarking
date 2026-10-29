@@ -149,16 +149,26 @@ Replaying the same `stage1_axes` bag through OpenVINS (drift from
 EuRoC `V1_01_easy` on the same OpenVINS build + replay harness: 1.4 %.
 So OpenVINS and the tooling are sound; the calibration was the fault.
 
-### Current validation status (updated 24 Oct 2026)
-1. ~~Flight test with raw topics~~ **Done 10 Oct 2026** (4 flights). No frame/axis error: attitude
-   agreed with the flight controller to ≤ 4.4° tilt and ≤ 15° heading, and early scale was
-   0.85–1.09. The `T_cam_imu` fix holds. Position still drifts (a separate problem, §6–§7).
+### Current validation status (updated 29 Oct 2026)
+1. ~~Flight test with raw topics~~ **Done 10 Oct and 26 Oct 2026** (5 flights). No frame/axis error: attitude
+   agreed with the flight controller to ≤ 4.4° tilt and ≤ 15° heading, and scale was 0.85–1.09 early
+   (1.00 over the whole 26 Oct flight). The `T_cam_imu` fix holds. Position still drifts (§6–§7).
 2. A proper Kalibr calibration of the actual IR-stereo + Orbbec-built-in-IMU rig is **still owed**.
 3. ~~Mounting photo~~: mounting measured from flight data instead: camera facing down, 6–8° tilt.
 
 ---
 
 ## 6. What's confirmed working (with numbers)
+
+### Flight-tested, 26 Oct 2026 (details: [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/))
+
+One automatic mission (straight ~107 m out and back, ≤ 10.2 m/s, ~14 m high), **same estimator and
+config as 10 Oct**. Horizontal: **4.7 % end drift** (11.5 m / 245 m; ~11 % one-way at the far end),
+ATE RMSE 8.6 m, ~10 m after 100 m then flat, scale 1.00, heading offset ~6° (appeared during a fast
+35° yaw turn at the start of the leg), 41 % of errors inside OpenVINS's 3σ, and **no mid-flight stop**.
+The GPS reference was degraded by interference (HAcc 4.3 m in flight vs 2.2–3.9 m on 10 Oct), so
+measured errors are likely overestimated by up to ~4 m. Improvement came from conditions (texture,
+route, image motion, duration) and the detached field routine. See the iteration log (§10).
 
 ### Flight-tested, 10 Oct 2026 (details: [`flight_tests/2026-10-10/`](flight_tests/2026-10-10/))
 
@@ -201,12 +211,14 @@ The phased plan is in [`ROADMAP.md`](ROADMAP.md); the immediate checklist in [`H
    low-texture ground. Try on the recorded bags first: process every frame (`track_frequency` 21 → ≥ 30,
    #11), contrast boost, wider KLT search. Then fly a controlled ladder (hover → slow line → faster →
    other heights).
-2. **OpenVINS stopping mid-flight** (#7): replay flights 2/3/4 to see if it is deterministic; the
-   `flight_*` scripts now log it and core dumps are on.
+2. **OpenVINS stopping mid-flight** (#7): did **not** happen on 26 Oct with the detached `flight_*`
+   routine (consistent with the SSH-output-blocking hypothesis, not proven). Still replay flights 2/3/4
+   to see if it is deterministic; logs and core dumps are on.
 3. **Calibration** (#2, #8): Kalibr (IR stereo + Orbbec built-in IMU) and Allan variance for the IMU
    noise model. `kalibr_imu_chain.yaml` intrinsics (`Tw`, `Ta`, `Tg`, `R_IMUtoGYRO`, `R_IMUtoACC`)
    are still identity/zero, and `rostopic` must stay `/camera/gyro_accel/sample`.
-4. **Hardware:** RTC battery, secure the Jetson power connector (it lost power once while handled),
+4. **Hardware:** RTC battery, secure the Jetson power connector (it lost power once on 10 Oct and twice
+   on 26 Oct, losing `flight06`),
    soft-mount the whole camera, downward rangefinder for height; RTK GPS as the test reference.
 5. **Heading:** fuse the flight controller's compass heading (read via MAVROS) to correct OpenVINS
    yaw drift; later send the pose to the FC EKF as external navigation (via `vps_bridge`).
@@ -251,4 +263,25 @@ See [`ROADMAP.md`](ROADMAP.md) for the phased plan (bench → offline fixes → 
 flight ladder → flight-controller link → GPS-denied flight → map-based positioning), and
 [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md) for the immediate checklist. Done so far: `vps_bridge` wired to OpenVINS (now in the repo),
 `compute_drift.py` ported, raw-topic recording, `T_cam_imu` corrected (2026-09-06) and confirmed in
-flight (2026-10-10), field routine and clock fixes (2026-10-10), all code on GitHub (2026-10-24).
+flight (2026-10-10), field routine and clock fixes (2026-10-10), all code on GitHub (2026-10-24),
+second flight day with the new routine (2026-10-26). The progression is in §10.
+
+---
+
+## 10. Iteration log: what changed each round, and what it bought us
+
+Newest last. Numbers are the headline of each iteration; details are in the linked docs.
+
+| # | When | Iteration | What changed | Result | Evidence |
+|---|---|---|---|---|---|
+| 0 | Jun–Jul 2026 | First bring-up and first flight | Orbbec 335L + OpenVINS on the Jetson; laptop hand-carry bench tests; one flight recording **only** OpenVINS output | Bench 1.21–1.31 % (later shown to use the Pixhawk IMU: suspect). First flight **72 %** drift (~107 m off over ~150 m), Z +4 → −76 m. Bag not replayable | `KNOWN_ISSUES.md` #2 |
+| 1 | Jul–Aug | Hand-built 90° `T_cam_imu` "fix" + replay harness | 90° camera–IMU rotation (`78409db`); replay diagnostics (Jul 25); `vps_bridge` wired to OpenVINS; `compute_drift.py` ported; staged test plan + raw-topic recording (`6c2090d`, 29 Aug) | Every Orbbec test drifted 20–50 % (the "fix" was wrong). Replay infra had its own bugs (zombie nodes, namespace, DDS, wrong topic) | `KNOWN_ISSUES.md` #4, `scripts/replay_diag/` |
+| 2 | 6 Sep | Calibration root cause | Reverted `T_cam_imu` to the stock near-identity rotation (`4559cb2`); shutdown patch (`da5e46a`); power mode → MAXN_SUPER; first clock fix, `wifi-mode` | `stage1_axes` replay **43.7 % → 1.15 %**; EuRoC 1.4 %. Live handheld tests diverged ~70 m until the 15 W power mode was found; replays of the same bags 1.4–8.6 % | `KNOWN_ISSUES.md` #2, #3 |
+| 3 | 10 Oct | **First flight tests** (Stage 3), 4 AUTO missions | Flown with the 6 Sep config; 3 SSH terminals; raw topics recorded; analysis vs FC `.bin` logs | No axis error (attitude ≤ 4.4°). Drift **9.4–95 %**; 10 m off after 58–103 m; **OpenVINS stopped mid-flight in 3 of 4**. Causes: image motion (fast + low) and plain ground; covariance over-confident (5–10 % in 3σ). Clock reset to 1970 on every boot | [`flight_tests/2026-10-10/`](flight_tests/2026-10-10/) |
+| 4 | 10–24 Oct | Field routine and infrastructure | `flight_*` scripts (processes detached from SSH, per-flight logs, PID files); clock fix v2 (udev → systemd restore, monotonic save); core dumps; OpenVINS exits immediately on SIGINT/SIGTERM (`577805b`); `check_setup.sh` fixes; analysis pipeline in `scripts/analysis/`; all code on GitHub; `ROADMAP.md`. Found `track_frequency: 21` (OpenVINS uses every other frame) | Clock restore verified across reboots; OpenVINS stop 0.1 s, clean | `KNOWN_ISSUES.md` #5, #9–#11 |
+| 5 | 26 Oct | **Second flight day**, same estimator | New routine in the field; bench static test; one straight out-and-back mission (~14 m, ≤ 10.2 m/s) over more textured ground, ~2 min still before take-off. `flight_status` false-alarm fixes (3 s → 6 s `822e49f`; daemon/TTY fixes on vajra, uncommitted) | Static: **0.3 cm in 44 s**. Flight: **4.7 % horizontal** (~11 % one-way), ATE 8.6 m, flat after 100 m, scale 1.00, **no mid-flight stop**, 41 % in 3σ. GPS reference degraded by interference (measured error likely overestimated). Remaining: ~6° heading offset (fast yaw turn + acceleration), Jetson power losses (lost `flight06`) | [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/) |
+
+**Trend:** the camera–IMU calibration error (iterations 1–2) is solved; drift in flight is now set by
+**flight conditions** (texture, image motion, turns, duration) and **heading drift**, not by a frame bug.
+The estimator configuration has not changed since 6 Sep: every improvement after that came from test
+infrastructure and how we fly.

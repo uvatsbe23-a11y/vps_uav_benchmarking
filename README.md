@@ -3,15 +3,17 @@
 Configurations, field scripts and analysis tools for evaluating Visual-Inertial Odometry (VIO) on an
 NVIDIA Jetson Orin Nano paired with an Orbbec Gemini 335L stereo IR camera (OpenVINS; cuVSLAM optional).
 
-## Current status (24 Oct 2026)
+## Current status (29 Oct 2026)
 
-First dynamic flight tests flown on **10 Oct 2026** (4 automatic GPS missions, camera facing down).
-OpenVINS holds attitude and early scale, but its position drifts ~10 m after 50–100 m, and it
-stopped mid-flight in 3 of 4 flights. **Start here:**
+Two flight-test days. **10 Oct** (4 AUTO missions): drift 9–95 %, OpenVINS stopped mid-flight in 3 of 4.
+**26 Oct** (same estimator, new field routine, better ground/route): **4.7 % horizontal drift** on a
+245 m out-and-back (~11 % one-way), ~10 m after 100 m then flat, **no mid-flight stop**; GPS reference
+degraded by interference. Progress per iteration: [`docs/PIPELINE_OVERVIEW.md` §10](docs/PIPELINE_OVERVIEW.md).
+**Start here:**
 
 - [`docs/ROADMAP.md`](docs/ROADMAP.md): **the plan**, from bench readiness to GPS-denied flight (phases with exit criteria)
 - [`docs/HANDOFF_2026-10-10.md`](docs/HANDOFF_2026-10-10.md): conclusions, what changed, and the immediate next steps (incl. the next flight day checklist)
-- [`docs/flight_tests/2026-10-10/`](docs/flight_tests/2026-10-10/): detailed flight analysis with figures
+- [`docs/flight_tests/2026-10-26/`](docs/flight_tests/2026-10-26/) and [`2026-10-10/`](docs/flight_tests/2026-10-10/): detailed flight analyses with figures
 - [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) · [`docs/PIPELINE_OVERVIEW.md`](docs/PIPELINE_OVERVIEW.md) · [`docs/TEST_PLAN.md`](docs/TEST_PLAN.md)
 
 ## Hardware prerequisites (every boot)

@@ -1,7 +1,7 @@
 # Known Issues & Debugging Log
 
-Updated 24 Oct 2026 after the first flight tests (10 Oct). Details of those flights:
-[`flight_tests/2026-10-10/`](flight_tests/2026-10-10/). Next steps: [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md).
+Updated 29 Oct 2026 after the second flight day (26 Oct). Flight details:
+[`flight_tests/2026-10-10/`](flight_tests/2026-10-10/), [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/). Next steps: [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md).
 
 | # | Issue | Status |
 |---|---|---|
@@ -9,14 +9,16 @@ Updated 24 Oct 2026 after the first flight tests (10 Oct). Details of those flig
 | 2 | `T_cam_imu` 90° "axis fix" was wrong | **fixed and flight-confirmed** (no frame error in flight) |
 | 3 | Jetson power mode / clocks | fixed: use `nvpmodel -m 2` (**not** `-m 0`) |
 | 4 | Bag-replay measurement bugs | fixed (2026-09-06) |
-| 5 | OpenVINS crash/hang on shutdown | fixed (2nd patch, 2026-10-10); test under load pending |
-| 6 | **Position drift in flight** (fast & low, low texture) | **open**: main problem |
-| 7 | **OpenVINS stops publishing mid-flight** | **open**: cause unknown, now instrumented |
-| 8 | OpenVINS covariance over-confident | **open** |
+| 5 | OpenVINS crash/hang on shutdown | **fixed**, verified under load on 26 Oct |
+| 6 | **Position drift in flight** (fast & low, low texture, heading) | **open**: improved to 4.7 % horizontal on 26 Oct (conditions only) |
+| 7 | **OpenVINS stops publishing mid-flight** | **open**, but did not recur on 26 Oct with the detached routine |
+| 8 | OpenVINS covariance over-confident | **open** (5–10 % → 41 % inside 3σ on 26 Oct) |
 | 9 | Jetson clock resets to 1970 | fixed in software; RTC battery recommended |
 | 10 | `check_setup.sh` false warnings | fixed |
 | 11 | OpenVINS processes only every other frame (`track_frequency: 21`) | open (1-line change, test on replays first) |
 | 12 | `compute_drift.py` understates drift when OpenVINS diverges | known; use `scripts/analysis/` |
+| 13 | **Jetson power loss** (1× on 10 Oct, 2× on 26 Oct) | **open**: hardware; lost `flight06` |
+| 14 | `flight_status` false "stalled" | fixed on vajra 26 Oct (**commit pending**) |
 
 ---
 
@@ -105,7 +107,7 @@ Every replay drift number produced before 2026-09-06 is suspect. All in the *mea
 * **Fix:** two local patches in [`third_party/open_vins/patches/`](../third_party/open_vins/patches/):
   `0001` `_Exit()` after shutdown (2026-09-06; launch logs later showed it was not enough), and
   `0002` **exit immediately on SIGINT/SIGTERM** (2026-10-10): stops in 0.1 s, 3/3 runs.
-  **Still to test while OpenVINS is processing images.** A clean upstream checkout loses these patches.
+  **Verified under load on 26 Oct** (clean exit while processing images). A clean upstream checkout loses these patches.
 
 ## 6. Position drift in flight (open, the main problem)
 
@@ -116,8 +118,14 @@ off (95 % of a 406 m path). From 5 s window analysis:
 * **Second: low-texture / low-contrast ground**, which drifts ~2.5× faster even when hovering.
 * **No clear effect:** vibration at 9 m, brightness, compute.
 * Provisional envelope: speed ÷ height ≤ ~0.35 s⁻¹. Height is the weakest axis.
+* **26 Oct (same estimator):** 4.7 % horizontal end drift on a 245 m out-and-back (~11 % one-way),
+  ~10 m after 100 m then flat, scale 1.00. Better texture (median 400 vs 32–356 corners/img), lower
+  image motion (≤ 13 px/frame), simple route, 73 s flight. Most remaining horizontal error is a ~6°
+  heading offset that appeared during a fast 35° yaw turn (47°/s) combined with hard acceleration at the
+  start of the leg; vertical error coincided with a camera vibration peak (~20 m/s²). GPS reference was
+  degraded by interference (HAcc 4.3 m), so errors are likely overestimated.
 * Next: process all frames (#11), contrast boost, wider KLT search, lidar height, compass heading,
-  controlled flight ladder. See the handoff.
+  controlled flight ladder incl. a dedicated yaw test. See `ROADMAP.md`.
 
 ## 7. OpenVINS stops publishing mid-flight (open)
 
@@ -127,7 +135,8 @@ overload). Hypotheses: (a) blocked console output to an SSH terminal whose Wi-Fi
 (flights 2/3 stopped at their farthest points); (b) a crash: other runs in the launch logs show
 spontaneous segfaults (−11), but every boot logged in "1970", so they could not be matched to flights.
 **Now instrumented:** processes detached from SSH with per-flight logs (`flight_*`), core dumps to
-`/var/crash/cores/`, clock fixed. Next step: replay flights 2/3/4 and see if it stops at the same moment.
+`/var/crash/cores/`, clock fixed. **26 Oct:** no stop in the one real flight (and none in the bench
+sessions), consistent with hypothesis (a). Next step: replay flights 2/3/4 and see if it stops at the same moment.
 
 ## 8. OpenVINS covariance is over-confident (open)
 
@@ -164,3 +173,27 @@ motion between processed frames (#6). Raising it to ≥ 30 is a one-line change;
 It divides the endpoint error by OpenVINS's *own* path length, which inflates when the estimate runs
 away (flight 1: 58–61 % vs a true 95 % against the reference path). Fine for healthy closed loops;
 for flights use `scripts/analysis/analyze_flight.py` with the flight-controller log.
+
+## 13. Jetson power loss (open, hardware)
+
+10 Oct: once while the drone was handled (damaged pre-flight bag `stage3_flight1_1037`). 26 Oct: twice,
+the second at ~11:27:35 while `flight06` was recording: `metadata.yaml` 0 bytes, db3 malformed, all logs
+end in NUL bytes, `session.txt` partly garbage. The clock restore worked after each boot (restored to
+the last saved time; sync from the PC before recording). Fix: secure the power connector (locking
+connector, strain relief, own BEC). A damaged bag can usually be partly salvaged (sqlite `.recover`,
+then `ros2 bag reindex`).
+
+## 14. `flight_status` reported "NO OUTPUT NOW (stalled?)" while OpenVINS was fine (fixed on vajra 26 Oct)
+
+Three causes, found in sequence:
+1. 3 s timeout too short for `ros2 topic hz` to start on the Jetson (fixed in `822e49f`).
+2. A **ROS daemon started from a shell with a different `ROS_LOCALHOST_ONLY`** (0 vs 1) cannot see the
+   localhost-only processes; CLI tools that use it see nothing.
+3. **`timeout` runs the ROS CLI in a background process group; in an interactive terminal it gets
+   stopped (SIGTTOU/SIGTTIN) and never answers.** Only reproducible with a TTY (`ssh -tt`), which is why
+   non-interactive checks always passed.
+
+Fix (on vajra, **not yet committed**, Jetson offline at the time of writing): `ov_live` liveness =
+OpenVINS initialised **and** `openvins.log` written within 3 s (instant, no ROS CLI); `topic_alive` via
+`ros2 topic echo --once --no-daemon`; `timeout --foreground … </dev/null`; `flight_start` runs
+`ros2 daemon stop`; `export ROS_LOCALHOST_ONLY=1` added to vajra's `~/.bashrc`.
