@@ -1,7 +1,7 @@
 # Known Issues & Debugging Log
 
-Updated 29 Oct 2026 after the second flight day (26 Oct). Flight details:
-[`flight_tests/2026-10-10/`](flight_tests/2026-10-10/), [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/). Next steps: [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md).
+Updated 3 Nov 2026 after the third flight day (1 Nov). Flight details:
+[`flight_tests/2026-10-10/`](flight_tests/2026-10-10/), [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/), [`flight_tests/2026-11-01/`](flight_tests/2026-11-01/). Next steps: [`HANDOFF_2026-10-10.md`](HANDOFF_2026-10-10.md).
 
 | # | Issue | Status |
 |---|---|---|
@@ -10,15 +10,18 @@ Updated 29 Oct 2026 after the second flight day (26 Oct). Flight details:
 | 3 | Jetson power mode / clocks | fixed: use `nvpmodel -m 2` (**not** `-m 0`) |
 | 4 | Bag-replay measurement bugs | fixed (2026-09-06) |
 | 5 | OpenVINS crash/hang on shutdown | **fixed**, verified under load on 26 Oct |
-| 6 | **Position drift in flight** (fast & low, low texture, heading) | **open**: improved to 4.7 % horizontal on 26 Oct (conditions only) |
-| 7 | **OpenVINS stops publishing mid-flight** | **open**, but did not recur on 26 Oct with the detached routine |
-| 8 | OpenVINS covariance over-confident | **open** (5–10 % → 41 % inside 3σ on 26 Oct) |
+| 6 | **Position drift in flight** (fast & low, low texture, heading) | **open**: 1 Nov two-way 0.2–1.7 %, one-way 5.5–8.5 % (mostly compass heading, #15); one tracking failure in 5 flights |
+| 7 | **OpenVINS stops publishing mid-flight** | **open**, but did not recur in 6 flights (26 Oct, 1 Nov) with the detached routine |
+| 8 | OpenVINS covariance over-confident | **open** (5–10 % → 41 % on 26 Oct → 6–37 % on 1 Nov inside 3σ) |
 | 9 | Jetson clock resets to 1970 | fixed in software; RTC battery recommended |
 | 10 | `check_setup.sh` false warnings | fixed |
 | 11 | OpenVINS processes only every other frame (`track_frequency: 21`) | open (1-line change, test on replays first) |
 | 12 | `compute_drift.py` understates drift when OpenVINS diverges | known; use `scripts/analysis/` |
-| 13 | **Jetson power loss** (1× on 10 Oct, 2× on 26 Oct) | **open**: hardware; lost `flight06` |
-| 14 | `flight_status` false "stalled" | fixed on vajra 26 Oct (**commit pending**) |
+| 13 | **Jetson power loss** (1× 10 Oct, 2× 26 Oct, 1× 1 Nov) | **open**: hardware; lost `flight06` |
+| 14 | `flight_status` false "stalled" | fixed on vajra 26 Oct (**commit pending**: Jetson was offline at handover) |
+| 15 | **Compass heading ~4° off on the ground** | **open**: measured on every flight; fix the compass before GPS-denied flight |
+| 16 | Battery current sensor reads 0 A | **open**: blocks CompassMot and mAh logging |
+| 17 | RTL ignores mission ChangeSpeed (return flown at 10 m/s) | known: set `RTL_SPEED` or end with waypoint + LAND |
 
 ---
 
@@ -197,3 +200,27 @@ Fix (on vajra, **not yet committed**, Jetson offline at the time of writing): `o
 OpenVINS initialised **and** `openvins.log` written within 3 s (instant, no ROS CLI); `topic_alive` via
 `ros2 topic echo --once --no-daemon`; `timeout --foreground … </dev/null`; `flight_start` runs
 `ros2 daemon stop`; `export ROS_LOCALHOST_ONLY=1` added to vajra's `~/.bashrc`.
+
+## 15. Compass heading ~4° off on the ground (open)
+
+On all five 1 Nov flights (and on 26 Oct) the flight controller's EKF heading turned 3.3–4.5° more than
+its own gyro measured between arming and the far end: the compass was ~4° off on the ground and GPS
+corrected it in flight. The analysis anchors OpenVINS with the ground heading, so this appeared as a
++3–6° rotation of every OpenVINS track (same sign every flight). In GPS-denied use nothing would correct
+it: each degree adds ~1.7 % one-way error. Check with `scripts/analysis/compass_offset_check.py`
+(end the window before fast yaw turns). Fix: battery current sensor (#16) → CompassMot, field
+calibration with everything mounted and powered, compass on a mast away from the Jetson and power
+leads (an RM3100 DroneCAN magnetometer is the planned upgrade), and a short straight GPS leg at the
+start of missions. Target: under ~2.5° in four flight directions.
+
+## 16. Battery current sensor reads 0 A (open)
+
+`BAT` current is 0 A on every 1 Nov flight, so no mAh logging and CompassMot (motor-current
+interference compensation) cannot be run. Configure or replace the power module.
+
+## 17. RTL ignores mission ChangeSpeed
+
+On 1 Nov the missions set 1.5–2 m/s with ChangeSpeed before RTL, but RTL flew back at ~10 m/s
+(it uses `RTL_SPEED`, which falls back to `WPNAV_SPEED`). For slow camera tests set `RTL_SPEED`, put
+ChangeSpeed before the first waypoint, or end with a waypoint over home plus LAND. Also note
+`LOG_DISARMED = 0`: one `.bin` can contain several flights; split by arming/disarming times.

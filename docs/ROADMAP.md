@@ -3,6 +3,14 @@
 *Written 24 Oct 2026, after the first flight tests (10 Oct 2026) and the design discussion that
 followed. Update it as phases complete.*
 
+> **Update 3 Nov 2026 (handover):** three flight days done. On 1 Nov: two-way 0.2–1.7 %, one-way
+> 5.5–8.5 %, mostly a ~4° ground compass error (with heading from the flight controller: 1.7–3.8 %).
+> No mid-flight stops since the field routine (6 flights). Observed envelope and full status: the
+> handover manual [`VPS_Navigation_System_Manual.docx`](VPS_Navigation_System_Manual.docx) and
+> [`flight_tests/2026-11-01/`](flight_tests/2026-11-01/). The provisional speed ÷ height limit is now
+> ~0.5 s⁻¹ (0.35 was too strict). Next: offline replay with more features, compass fixes (§4,
+> KNOWN_ISSUES #15–16), then the Phase 3 ladder with longer one-way legs.
+
 **Goal:** a camera-based positioning system good enough for the drone to fly GPS-denied: hold
 position, fly missions and return home without GPS, with a **bounded** position error.
 

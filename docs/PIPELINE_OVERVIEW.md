@@ -160,6 +160,16 @@ So OpenVINS and the tooling are sound; the calibration was the fault.
 
 ## 6. What's confirmed working (with numbers)
 
+### Flight-tested, 1 Nov 2026 (details: [`flight_tests/2026-11-01/`](flight_tests/2026-11-01/))
+
+Five AUTO missions at ~20 m (25 m on the last), up to 10 m/s, out-and-back routes of 74 m and 163 m and
+one triangle with a 150° turn. Same estimator and config. **Two-way 0.2–1.7 %** on 3 of 4 flights
+(4.9 % on flight 3), **one-way 5.5–8.5 %** at the far end. The one-way error is dominated by a ~4°
+compass heading error on the ground (the flight controller corrected its own heading by 3.3–4.5° in
+flight on every flight); with the flight controller's in-flight heading applied to every OpenVINS step
+the one-way error is **1.7–3.8 %**, and 4.8–6.5 % with a realistic 2.5° compass error. OpenVINS ran
+every flight start to finish; one tracking failure (~10 m in 4 s over bare ground at 10 m/s, flight 3).
+
 ### Flight-tested, 26 Oct 2026 (details: [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/))
 
 One automatic mission (straight ~107 m out and back, ≤ 10.2 m/s, ~14 m high), **same estimator and
@@ -280,8 +290,9 @@ Newest last. Numbers are the headline of each iteration; details are in the link
 | 3 | 10 Oct | **First flight tests** (Stage 3), 4 AUTO missions | Flown with the 6 Sep config; 3 SSH terminals; raw topics recorded; analysis vs FC `.bin` logs | No axis error (attitude ≤ 4.4°). Drift **9.4–95 %**; 10 m off after 58–103 m; **OpenVINS stopped mid-flight in 3 of 4**. Causes: image motion (fast + low) and plain ground; covariance over-confident (5–10 % in 3σ). Clock reset to 1970 on every boot | [`flight_tests/2026-10-10/`](flight_tests/2026-10-10/) |
 | 4 | 10–24 Oct | Field routine and infrastructure | `flight_*` scripts (processes detached from SSH, per-flight logs, PID files); clock fix v2 (udev → systemd restore, monotonic save); core dumps; OpenVINS exits immediately on SIGINT/SIGTERM (`577805b`); `check_setup.sh` fixes; analysis pipeline in `scripts/analysis/`; all code on GitHub; `ROADMAP.md`. Found `track_frequency: 21` (OpenVINS uses every other frame) | Clock restore verified across reboots; OpenVINS stop 0.1 s, clean | `KNOWN_ISSUES.md` #5, #9–#11 |
 | 5 | 26 Oct | **Second flight day**, same estimator | New routine in the field; bench static test; one straight out-and-back mission (~14 m, ≤ 10.2 m/s) over more textured ground, ~2 min still before take-off. `flight_status` false-alarm fixes (3 s → 6 s `822e49f`; daemon/TTY fixes on vajra, uncommitted) | Static: **0.3 cm in 44 s**. Flight: **4.7 % horizontal** (~11 % one-way), ATE 8.6 m, flat after 100 m, scale 1.00, **no mid-flight stop**, 41 % in 3σ. GPS reference degraded by interference (measured error likely overestimated). Remaining: ~6° heading offset (fast yaw turn + acceleration), Jetson power losses (lost `flight06`) | [`flight_tests/2026-10-26/`](flight_tests/2026-10-26/) |
+| 6 | 1 Nov | **Third flight day**, same estimator | Five missions at ~20 m, ≤ 10 m/s (incl. a triangle with a 150° yaw at 80°/s); one `.bin` log split per flight; compass-offset check (FC heading vs its own gyro) and compass simulation (`scripts/analysis/compass_*.py`) | Two-way **0.2–1.7 %** (3 of 4), 4.9 % (1); one-way **5.5–8.5 %**, mostly a ~4° ground compass error; with FC heading **1.7–3.8 %** (simulated). No mid-flight stop; one tracking failure over bare ground (flight 3). Jetson power loss after the last flight; current sensor reads 0 A; RTL ignores ChangeSpeed | [`flight_tests/2026-11-01/`](flight_tests/2026-11-01/) |
 
-**Trend:** the camera–IMU calibration error (iterations 1–2) is solved; drift in flight is now set by
-**flight conditions** (texture, image motion, turns, duration) and **heading drift**, not by a frame bug.
-The estimator configuration has not changed since 6 Sep: every improvement after that came from test
-infrastructure and how we fly.
+**Trend:** the camera–IMU calibration error (iterations 1–2) is solved. Since then the estimator
+configuration has not changed; every improvement came from test infrastructure, procedure and flight
+conditions. On 1 Nov the main remaining one-way error is the compass heading on the ground, not
+OpenVINS; the open OpenVINS problem is short tracking failures over bare ground at speed.

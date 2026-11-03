@@ -1,0 +1,34 @@
+=== t2: OpenVINS vs flight-controller reference ===
+Reference: EKF3 (XKF1) position. GPS 14-16 sats, HAcc 1.5-2.5 m, VAcc 2.0-3.7 m -> errors below ~2-3 m are not resolvable.
+Time sync: gyro correlation 0.932; bag clock = GPS time -0.370 s
+Camera mounting (from gyros): camera IMU z-axis 4.7 deg from body-down -> camera faces DOWN
+Timeline (from arming): takeoff    3.9s, landing   74.2s, disarm   74.2s
+OpenVINS output covers 0.0s .. 74.2s after arming (flight ends 74.2s)
+Flight: true path 185 m whole flight (185 m while OpenVINS ran), max speed 10.1 m/s, mean airborne speed 2.1 m/s, height ~19.2 m
+
+#1 ATE (absolute trajectory error)
+   anchored at arming (live-use, honest) : RMSE 2.8 m, max 5.0 m
+   best-fit 4-DoF over flight (optimistic): RMSE 2.0 m, max 3.8 m
+   frame-link yaw -32.5 deg vs best-fit yaw -29.0 deg
+#2 Drift
+   end-point error 3.0 m  /  true path 185 m  =  1.6 %   (old method, VIO's own path 181 m: 1.6 %)
+#4 Scale
+   whole flight: VIO path / true path = 0.98
+   early flight (takeoff -> 15s): sim3 scale 0.96, path ratio 1.01
+#5 Per-axis error (anchored)          RMSE     max     at end
+   East                                 2.3     4.3     -2.5 m
+   North                                1.4     3.6     +0.4 m
+   Up (Z)                               0.8     1.7     -1.6 m
+   VIO height at landing: +0.6 m (true ~0)
+#9 Divergence (anchored error first exceeds threshold, after takeoff)
+   >  2 m :  15.5 s after takeoff, after    37 m flown
+   >  5 m : never
+   > 10 m : never
+#12 Vibration (RMS of >5 Hz accel, m/s^2; ArduPilot guide: <30 good, >60 bad)
+   FC IMU   (VIBE)  : mean X/Y/Z 0.9/1.8/3.7, max 9.2, clip count 0
+   camera IMU       : mean X/Y/Z 1.1/4.7/5.0, max 10.5   (on ground before arming: 0.09)
+   camera accel |a| max 50.6 m/s^2 (5.2 g)
+Also noted
+   heading drift vs FC: max 5.1 deg, end +4.5 deg; tilt agreement max 4.7 deg
+   OpenVINS output rate in air 15.0 Hz (camera 30 Hz)
+   error inside OpenVINS's own 3-sigma: 10% of the flight (consistent filter ~99%)

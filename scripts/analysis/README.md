@@ -16,6 +16,12 @@ All scripts read and write files in the **current folder**, named `tN_*` per fli
 | 5 | `diagnose_conditions.py` | all flights → 5 s windows: drift vs conditions (`conditions_report.txt`, `conditions_vs_drift.png`) |
 | 6 | `extract_frames.py out.png name:bag:offset:t:label …` | camera frames from chosen windows (e.g. best vs worst) |
 | 7 | `make_infographic.py` | 5 plain-language summary images (headless Firefox; output dir via `INFOGRAPHIC_OUT`) |
+| 8 | `compass_offset_check.py <log.bin> <t_start> <t_end>` | how much the FC's EKF heading moved relative to its own gyro (≈ ground compass error); end the window before fast yaw turns |
+| 9 | `compass_simulation.py tN` | → `tN_compass.npz`: OpenVINS track rebuilt with the FC heading applied to every step (prediction for a connected compass) |
+| 10 | `make_flight_video.py worst\|best` | side-by-side handover videos (camera with used corners + GPS vs OpenVINS map); edit `CFG` for other flights |
+
+**Several flights in one `.bin`** (ArduPilot logs only while armed): extract once with `extract_bin.py`,
+then split the arrays by the arming/disarming times into one `tN_log.npz` per flight before step 3.
 
 `clock_offset_s` is only for bags recorded while the Jetson clock was wrong (e.g. 1970):
 real time = bag time + offset.

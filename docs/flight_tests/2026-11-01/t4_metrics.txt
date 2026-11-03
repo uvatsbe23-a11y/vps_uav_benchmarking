@@ -1,0 +1,34 @@
+=== t4: OpenVINS vs flight-controller reference ===
+Reference: EKF3 (XKF1) position. GPS 15-16 sats, HAcc 2.1-2.8 m, VAcc 3.0-4.3 m -> errors below ~2-3 m are not resolvable.
+Time sync: gyro correlation 0.996; bag clock = GPS time -0.375 s
+Camera mounting (from gyros): camera IMU z-axis 5.0 deg from body-down -> camera faces DOWN
+Timeline (from arming): takeoff    4.0s, landing   80.5s, disarm   80.5s
+OpenVINS output covers 0.0s .. 80.5s after arming (flight ends 80.5s)
+Flight: true path 199 m whole flight (199 m while OpenVINS ran), max speed 10.1 m/s, mean airborne speed 2.1 m/s, height ~19.8 m
+
+#1 ATE (absolute trajectory error)
+   anchored at arming (live-use, honest) : RMSE 3.0 m, max 6.5 m
+   best-fit 4-DoF over flight (optimistic): RMSE 0.9 m, max 2.5 m
+   frame-link yaw -29.8 deg vs best-fit yaw -25.0 deg
+#2 Drift
+   end-point error 2.2 m  /  true path 199 m  =  1.1 %   (old method, VIO's own path 201 m: 1.1 %)
+#4 Scale
+   whole flight: VIO path / true path = 1.01
+   early flight (takeoff -> 18s): sim3 scale 1.04, path ratio 0.98
+#5 Per-axis error (anchored)          RMSE     max     at end
+   East                                 1.9     4.4     -0.3 m
+   North                                2.3     5.3     -0.1 m
+   Up (Z)                               0.6     2.2     -2.2 m
+   VIO height at landing: -0.4 m (true ~0)
+#9 Divergence (anchored error first exceeds threshold, after takeoff)
+   >  2 m :  14.4 s after takeoff, after    30 m flown
+   >  5 m :  18.0 s after takeoff, after    65 m flown
+   > 10 m : never
+#12 Vibration (RMS of >5 Hz accel, m/s^2; ArduPilot guide: <30 good, >60 bad)
+   FC IMU   (VIBE)  : mean X/Y/Z 0.9/1.9/3.8, max 18.6, clip count 0
+   camera IMU       : mean X/Y/Z 1.2/5.1/5.8, max 11.7   (on ground before arming: 0.14)
+   camera accel |a| max 51.0 m/s^2 (5.2 g)
+Also noted
+   heading drift vs FC: max 6.3 deg, end +4.2 deg; tilt agreement max 3.6 deg
+   OpenVINS output rate in air 15.0 Hz (camera 30 Hz)
+   error inside OpenVINS's own 3-sigma: 13% of the flight (consistent filter ~99%)

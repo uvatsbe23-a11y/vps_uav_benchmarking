@@ -3,17 +3,25 @@
 Configurations, field scripts and analysis tools for evaluating Visual-Inertial Odometry (VIO) on an
 NVIDIA Jetson Orin Nano paired with an Orbbec Gemini 335L stereo IR camera (OpenVINS; cuVSLAM optional).
 
-## Current status (29 Oct 2026)
+## Current status (3 Nov 2026, handover)
 
-Two flight-test days. **10 Oct** (4 AUTO missions): drift 9–95 %, OpenVINS stopped mid-flight in 3 of 4.
-**26 Oct** (same estimator, new field routine, better ground/route): **4.7 % horizontal drift** on a
-245 m out-and-back (~11 % one-way), ~10 m after 100 m then flat, **no mid-flight stop**; GPS reference
-degraded by interference. Progress per iteration: [`docs/PIPELINE_OVERVIEW.md` §10](docs/PIPELINE_OVERVIEW.md).
+Three flight-test days. **10 Oct** (4 AUTO missions): drift 9–95 %, OpenVINS stopped mid-flight in 3 of 4.
+**26 Oct**: 5.0 % two-way / 10.8 % one-way, no mid-flight stop. **1 Nov** (5 missions, ~20 m, ≤ 10 m/s):
+**two-way 0.2–1.7 %** on 3 of 4 flights (4.9 % on one), **one-way 5.5–8.5 %**, mostly from a ~4° compass
+heading error on the ground; with heading from the flight controller **1.7–3.8 %** one-way (simulated).
+One flight in five had a short tracking failure over bare ground. Estimator config unchanged since 6 Sep.
+Progress per iteration: [`docs/PIPELINE_OVERVIEW.md` §10](docs/PIPELINE_OVERVIEW.md).
+
+**Handover:** the complete project manual (history, methods, decisions, results, field procedure, next
+steps) is [`docs/VPS_Navigation_System_Manual.docx`](docs/VPS_Navigation_System_Manual.docx). Further work on
+this project is done by Aatish Kumar Sahu and Siddharth Kakroo. Videos of the worst and best flights:
+[`docs/videos/`](docs/videos/).
+
 **Start here:**
 
 - [`docs/ROADMAP.md`](docs/ROADMAP.md): **the plan**, from bench readiness to GPS-denied flight (phases with exit criteria)
 - [`docs/HANDOFF_2026-10-10.md`](docs/HANDOFF_2026-10-10.md): conclusions, what changed, and the immediate next steps (incl. the next flight day checklist)
-- [`docs/flight_tests/2026-10-26/`](docs/flight_tests/2026-10-26/) and [`2026-10-10/`](docs/flight_tests/2026-10-10/): detailed flight analyses with figures
+- [`docs/flight_tests/2026-11-01/`](docs/flight_tests/2026-11-01/), [`2026-10-26/`](docs/flight_tests/2026-10-26/) and [`2026-10-10/`](docs/flight_tests/2026-10-10/): detailed flight analyses with figures
 - [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) · [`docs/PIPELINE_OVERVIEW.md`](docs/PIPELINE_OVERVIEW.md) · [`docs/TEST_PLAN.md`](docs/TEST_PLAN.md)
 
 ## Hardware prerequisites (every boot)
